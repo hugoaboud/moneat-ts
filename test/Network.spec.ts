@@ -5,7 +5,7 @@ describe('Build from Genome', () => {
 
     test('just tryin some stuff', async () => {
         
-        //let genome = new Genome(config, 1, 1);
+        let genome = new Genome(GenomeConfig(), 1, 1);
 
         return expect(0).toBe(1);
     });

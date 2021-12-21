@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "rm -rf build/ && tsc",
+    "cli": "yarn build && node build/cli.js",
     "test": "yarn build && node --trace-warnings node_modules/.bin/jest --runInBand --no-cache --verbose --silent=false"
   },
   "keywords": [

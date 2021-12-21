@@ -1,7 +1,8 @@
 /**
  * Returns colored string
  */ 
-export function Colored(msg: string, color: string) {
+export function Colored(msg: string, color?: string) {
+    if (!color) return msg;
     color = {
         black: '0;30',
         red: '0;31',

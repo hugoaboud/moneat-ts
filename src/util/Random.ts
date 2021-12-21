@@ -25,3 +25,8 @@ export function Gaussian(mean: number, stdev: number) {
         return mean + stdev * y1;
     }
 }
+
+export function StringID(length = 16) {
+    let allowed = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    return Array.from({length}, () => allowed[Math.floor(Math.random()*allowed.length)]).join('');
+}

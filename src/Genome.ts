@@ -1,6 +1,7 @@
 import { Activation, ActivationFunction, RandomActivation } from "./Activation";
+import { Colored } from "./cli/string";
 import { Exception } from "./util/Exception";
-import { Gaussian } from "./util/Random";
+import { Gaussian, StringID } from "./util/Random";
 
 /**
  * Genome Configuration
@@ -87,13 +88,14 @@ export interface NodeGene {
     activation: ActivationFunction
     bias: MutableParam
     mult: MutableParam
+    value: number
 }
 
 export interface ConnectionGene {
     in_node: NodeGene
     out_node: NodeGene
-    weight: MutableParam
     enabled: boolean
+    weight: MutableParam
     innovation: number
 }
 
@@ -104,6 +106,8 @@ export interface ConnectionGene {
  */
 
 export class Genome {
+
+    private id: string
 
     private nodes: NodeGene[] = []
     private connections: ConnectionGene[] = []
@@ -116,12 +120,15 @@ export class Genome {
         if (inputs <= 0) throw GenomeException.ZeroInputNodes();
         if (outputs <= 0) throw GenomeException.ZeroOutputNodes();
 
+        this.id = StringID();
+
         for (let i = 0; i < inputs; i++) {
             this.nodes.push({
                 type:'input',
                 activation: null as any,
                 bias: null as any,
-                mult: null as any
+                mult: null as any,
+                value: 0
             })
         }
 
@@ -130,7 +137,8 @@ export class Genome {
                 type:'output',
                 activation: RandomActivation(config.activation.output),
                 bias: new MutableParam(config.bias),
-                mult: new MutableParam(config.mult)
+                mult: new MutableParam(config.mult),
+                value: 0
             })
         }
     }
@@ -153,8 +161,8 @@ export class Genome {
         this.connections.push({ 
             in_node: in_node,
             out_node: out_node,
-            weight: new MutableParam(this.config.weight),  
             enabled: true,
+            weight: new MutableParam(this.config.weight),  
             innovation: Innovation.new
         })
     }
@@ -167,21 +175,22 @@ export class Genome {
             type: 'hidden',
             activation: RandomActivation(this.config.activation.hidden),
             bias: new MutableParam(this.config.bias),
-            mult: new MutableParam(this.config.mult)
+            mult: new MutableParam(this.config.mult),
+            value: 0
         })
 
         this.connections.push({
             in_node: conn.in_node,
             out_node: this.nodes[this.nodes.length-1],
-            weight: new MutableParam(this.config.weight),  
             enabled: true,
+            weight: new MutableParam(this.config.weight),  
             innovation: Innovation.new
         })
         this.connections.push({
             in_node: this.nodes[this.nodes.length-1],
             out_node: conn.out_node,
-            weight: new MutableParam(this.config.weight),  
             enabled: true,
+            weight: new MutableParam(this.config.weight),  
             innovation: Innovation.new
         })
 
@@ -195,8 +204,60 @@ export class Genome {
         // are called matching genes. Genes that do not match are either disjoint or excess, depend-
         // ing on whether they occur within or outside the range of the other parent’s innovation
         // numbers. They represent structure that is not present in the other genome.  In com-
-        // posing the offspring, genes are randomly chosen from either parent at matching genes,
+        // posing the offspring/, genes are randomly chosen from either parent at matching genes,
         // whereas all excess or disjoint genes are always included from the more fit parent.
+    }
+
+    /* Print to console */
+
+    public Print() {
+
+        console.log(Colored('Genome ', 'lightcyan') + Colored(this.id, 'lightblue'));
+        
+        console.log(Colored('- nodes:', 'lightgray'));
+        this.nodes.map((node,i) => {
+            let color = {
+                input: 'blue',
+                hidden: 'green',
+                output: 'purple'
+            }[node.type];
+            console.log(
+                Colored(`\t${(i+'  ').slice(0,3)} `, color) +
+                Colored(`${(node.type + ' ').slice(0,6)} `, color) +
+                (node.activation?.name || ''+'        ').slice(0,19) + ' ' +
+                (node.bias?((Colored('b:','darkgray') + node.bias.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' ' +
+                (node.mult?((Colored('m:','darkgray') + node.mult.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' ' +
+                Colored('v:','darkgray') + node.value.toFixed(3)
+            )
+        })
+        
+        console.log(Colored('- connections:', 'lightgray'));
+        this.connections.map((conn,i) => {
+            let color_in = {
+                input: 'blue',
+                hidden: 'green',
+                output: 'purple'
+            }[conn.in_node.type];
+            let color_out = {
+                input: 'blue',
+                hidden: 'green',
+                output: 'purple'
+            }[conn.out_node.type];
+            let color = null as any;
+            if (!conn.enabled) {
+                color = 'darkgray';
+            }
+            let i_in = this.nodes.indexOf(conn.in_node);
+            let i_out = this.nodes.indexOf(conn.out_node);
+            console.log(
+                Colored(`\t${(conn.innovation+'   ').slice(0,4)} `, color || 'lightblue') +
+                Colored(`${(i_in+'  ').slice(0,3)} `, color || color_in) +
+                Colored(' -> ', color) +
+                Colored(`${(i_out+'  ').slice(0,3)} `, color || color_out) + 
+                Colored('w:','darkgray') + Colored(conn.weight.value.toFixed(3), color)
+            )
+        })
+
     }
 
     /* Getters */
