@@ -96,7 +96,7 @@ describe('MutateAddNode', () => {
 
     test('Should fail for disabled connection', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.getNodes()[3],genome.getNodes()[0]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         let conn = genome.getConns()[0];
         conn.enabled = false;
         expect(() => {
