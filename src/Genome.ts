@@ -1,6 +1,7 @@
 import { Activation, ActivationFunction, RandomActivation } from "./Activation";
 import { Colored } from "./cli/string";
 import { Exception } from "./util/Exception";
+import Log, { LogLevel } from "./util/Log";
 import { Gaussian, StringID } from "./util/Random";
 
 /**
@@ -84,11 +85,11 @@ export class MutableParam {
  */
 
 export interface NodeGene {
+    id: number
     type: 'input' | 'hidden' | 'output'
     activation: ActivationFunction
     bias: MutableParam
     mult: MutableParam
-    value: number
 }
 
 export interface ConnectionGene {
@@ -110,91 +111,124 @@ export class Genome {
     private id: string
 
     private nodes: NodeGene[] = []
-    private connections: ConnectionGene[] = []
+    private conns: ConnectionGene[] = []
 
     constructor(
         protected config: IGenomeConfig,
-        inputs: number,
-        outputs: number
+        protected inputs: number,
+        protected outputs: number
     ) {
         if (inputs <= 0) throw GenomeException.ZeroInputNodes();
         if (outputs <= 0) throw GenomeException.ZeroOutputNodes();
 
         this.id = StringID();
+        Log.Method(this, `new(ins:${inputs},outs:${outputs})`, LogLevel.INFO);
 
         for (let i = 0; i < inputs; i++) {
             this.nodes.push({
+                id: this.nodes.length,
                 type:'input',
                 activation: null as any,
                 bias: null as any,
-                mult: null as any,
-                value: 0
+                mult: null as any
             })
         }
 
         for (let i = 0; i < outputs; i++) {
             this.nodes.push({
+                id: this.nodes.length,
                 type:'output',
                 activation: RandomActivation(config.activation.output),
                 bias: new MutableParam(config.bias),
-                mult: new MutableParam(config.mult),
-                value: 0
+                mult: new MutableParam(config.mult)
             })
         }
     }
 
     /* Mutation */
 
-    Mutate() {
+    RandomNodePair() {
+        let nodes = this.getNodes();
+        let in_nodes = nodes.filter(n => n.type !== 'output');
+        let out_nodes = nodes.filter(n => n.type !== 'input');
 
+        let in_node = in_nodes[Math.floor(Math.random()*in_nodes.length)];
+        
+        let out_node = null;
+        if (this.config.recurrent) {
+            out_node = out_nodes[Math.floor(Math.random()*out_nodes.length)];
+        }
+        else {
+            while (!out_node) {
+                out_node = out_nodes[Math.floor(Math.random()*out_nodes.length)];
+                if (out_node == in_node) out_node = null;
+            }
+        }
+
+        return [in_node, out_node]
+    }
+
+    RandomEnabledConnection() {
+        let conns = this.conns.filter(c => c.enabled);
+        return conns[Math.floor(Math.random() * conns.length)];
     }
 
     MutateAddConnection(in_node: NodeGene, out_node: NodeGene) {
         if (in_node.type === 'output') throw GenomeException.CantConnectFromOutput();
         if (out_node.type === 'input') throw GenomeException.CantConnectToInput();
-
-        this.connections.map(conn => {
+        this.conns.map(conn => {
             if (conn.in_node == in_node && conn.out_node == out_node)
-                throw GenomeException.DuplicateConnection();
+            throw GenomeException.DuplicateConnection();
         })
+        let innovation = Innovation.new;
+        Log.Method(this, `MutateAddConnection(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.INFO);
 
-        this.connections.push({ 
+        this.conns.push({ 
             in_node: in_node,
             out_node: out_node,
             enabled: true,
             weight: new MutableParam(this.config.weight),  
-            innovation: Innovation.new
+            innovation
         })
     }
     
     MutateAddNode(conn: ConnectionGene) {
+        if (!conn.enabled) throw GenomeException.CantAddToDisabledConnection();
+        
+        let innovation_a = Innovation.new;
+        let innovation_b = Innovation.new;
+        Log.Method(this, `MutateAddNode(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.INFO);
 
         conn.enabled = false;
 
         this.nodes.push({
+            id: this.nodes.length,
             type: 'hidden',
             activation: RandomActivation(this.config.activation.hidden),
             bias: new MutableParam(this.config.bias),
-            mult: new MutableParam(this.config.mult),
-            value: 0
+            mult: new MutableParam(this.config.mult)
         })
 
-        this.connections.push({
+        this.conns.push({
             in_node: conn.in_node,
             out_node: this.nodes[this.nodes.length-1],
             enabled: true,
             weight: new MutableParam(this.config.weight),  
-            innovation: Innovation.new
+            innovation: innovation_a
         })
-        this.connections.push({
+        this.conns.push({
             in_node: this.nodes[this.nodes.length-1],
             out_node: conn.out_node,
             enabled: true,
             weight: new MutableParam(this.config.weight),  
-            innovation: Innovation.new
+            innovation: innovation_b
         })
 
     }   
+
+    Mutate() {
+
+    }
 
     /* Crossover */
     
@@ -208,62 +242,16 @@ export class Genome {
         // whereas all excess or disjoint genes are always included from the more fit parent.
     }
 
-    /* Print to console */
-
-    public Print() {
-
-        console.log(Colored('Genome ', 'lightcyan') + Colored(this.id, 'lightblue'));
-        
-        console.log(Colored('- nodes:', 'lightgray'));
-        this.nodes.map((node,i) => {
-            let color = {
-                input: 'blue',
-                hidden: 'green',
-                output: 'purple'
-            }[node.type];
-            console.log(
-                Colored(`\t${(i+'  ').slice(0,3)} `, color) +
-                Colored(`${(node.type + ' ').slice(0,6)} `, color) +
-                (node.activation?.name || ''+'        ').slice(0,19) + ' ' +
-                (node.bias?((Colored('b:','darkgray') + node.bias.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' ' +
-                (node.mult?((Colored('m:','darkgray') + node.mult.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' ' +
-                Colored('v:','darkgray') + node.value.toFixed(3)
-            )
-        })
-        
-        console.log(Colored('- connections:', 'lightgray'));
-        this.connections.map((conn,i) => {
-            let color_in = {
-                input: 'blue',
-                hidden: 'green',
-                output: 'purple'
-            }[conn.in_node.type];
-            let color_out = {
-                input: 'blue',
-                hidden: 'green',
-                output: 'purple'
-            }[conn.out_node.type];
-            let color = null as any;
-            if (!conn.enabled) {
-                color = 'darkgray';
-            }
-            let i_in = this.nodes.indexOf(conn.in_node);
-            let i_out = this.nodes.indexOf(conn.out_node);
-            console.log(
-                Colored(`\t${(conn.innovation+'   ').slice(0,4)} `, color || 'lightblue') +
-                Colored(`${(i_in+'  ').slice(0,3)} `, color || color_in) +
-                Colored(' -> ', color) +
-                Colored(`${(i_out+'  ').slice(0,3)} `, color || color_out) + 
-                Colored('w:','darkgray') + Colored(conn.weight.value.toFixed(3), color)
-            )
-        })
-
-    }
-
     /* Getters */
 
-    public get nodeGenes() {return this.nodes}
-    public get connectionGenes() {return this.connections}
+    public getID() { return this.id }
+    public getNodes() { return this.nodes }
+    public getConns() { return this.conns }
+
+    public getInputCount() { return this.inputs };
+    public getInputs() { return this.nodes.filter(node => node.type === 'input') };
+    public getOutputCount() { return this.outputs };
+    public getOutputs() { return this.nodes.filter(node => node.type === 'output') };
 
 }
 
@@ -289,6 +277,9 @@ class GenomeException extends Exception {
     }
     static DuplicateConnection() {
         return new this('Can\'t create duplicate connection', this.code);
+    }
+    static CantAddToDisabledConnection() {
+        return new this('Can\'t add a node to a disabled connection', this.code);
     }
 
 }

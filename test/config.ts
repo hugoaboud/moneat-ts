@@ -12,7 +12,7 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge({
         hidden: [Activation.Linear],
         output: [Activation.Linear]
     },
-    recurrent: false
+    recurrent: true
     
 }, config);
 

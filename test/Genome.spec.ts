@@ -41,7 +41,7 @@ describe('Constructor', () => {
 
     test('Should create input and output nodes', async () => {
         let genome = new Genome(Config(),3,2);
-        let nodes = genome.nodeGenes;
+        let nodes = genome.getNodes();
         expect(nodes).toHaveLength(5);
         for (let i = 0; i < 3; i++) {
             expect(nodes[i].type).toBe('input');
@@ -50,7 +50,7 @@ describe('Constructor', () => {
             expect(nodes[i].type).toBe('output');
             expect(nodes[i].activation).toBe(Activation.Linear);
         }
-        let connections = genome.connectionGenes;
+        let connections = genome.getConns();
         expect(connections).toHaveLength(0);
     });
 
@@ -61,22 +61,22 @@ describe('MutateAddConnection', () => {
     test('Should fail for output node as in_node', async () => {
         let genome = new Genome(Config(),3,3);
         expect(() => {
-            genome.MutateAddConnection(genome.nodeGenes[3],genome.nodeGenes[0]);
+            genome.MutateAddConnection(genome.getNodes()[3],genome.getNodes()[0]);
         }).toThrowError('E_GENOME: Connection can\'t be created from an output node');
     });
 
     test('Should fail for input node as out_node', async () => {
         let genome = new Genome(Config(),3,3);
         expect(() => {
-            genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[0]);
+            genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[0]);
         }).toThrowError('E_GENOME: Connection can\'t be created to an input node');
     });
 
     test('Should add a connection', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         
-        let connections = genome.connectionGenes;
+        let connections = genome.getConns();
         expect(connections.length).toBe(1);
         expect(connections[0].enabled).toBe(true);
         expect(connections[0].innovation).toBe(Innovation.last);
@@ -84,9 +84,9 @@ describe('MutateAddConnection', () => {
 
     test('Should fail for duplicate connection', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         expect(() => {
-            genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
+            genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         }).toThrowError('E_GENOME: Can\'t create duplicate connection');
     });
 
@@ -94,12 +94,22 @@ describe('MutateAddConnection', () => {
 
 describe('MutateAddNode', () => {
 
+    test('Should fail for disabled connection', async () => {
+        let genome = new Genome(Config(),3,3);
+        genome.MutateAddConnection(genome.getNodes()[3],genome.getNodes()[0]);
+        let conn = genome.getConns()[0];
+        conn.enabled = false;
+        expect(() => {
+            genome.MutateAddNode(conn);
+        }).toThrowError('E_GENOME: Can\'t add a node to a disabled connection');
+    });
+
     test('Should disable old connection', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
-        genome.MutateAddNode(genome.connectionGenes[0]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        genome.MutateAddNode(genome.getConns()[0]);
         
-        expect(genome.connectionGenes[0].enabled).toBe(false);
+        expect(genome.getConns()[0].enabled).toBe(false);
     });
 
     test('Should fail for empty hidden activation options', async () => {
@@ -110,34 +120,34 @@ describe('MutateAddNode', () => {
                 hidden: []
             }
         },3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         expect(() => {
-            genome.MutateAddNode(genome.connectionGenes[0]);
+            genome.MutateAddNode(genome.getConns()[0]);
         }).toThrowError('E_ACTIVATION: Trying to pick random activation from empty options list');
     });
 
     test('Should create a node', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
-        genome.MutateAddNode(genome.connectionGenes[0]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        genome.MutateAddNode(genome.getConns()[0]);
         
-        expect(genome.nodeGenes[6]).toBeDefined();
-        expect(genome.nodeGenes[6].type).toBe('hidden');
+        expect(genome.getNodes()[6]).toBeDefined();
+        expect(genome.getNodes()[6].type).toBe('hidden');
     });
 
     test('Should create two connections, to and from the node', async () => {
         let genome = new Genome(Config(),3,3);
-        genome.MutateAddConnection(genome.nodeGenes[0],genome.nodeGenes[3]);
-        genome.MutateAddNode(genome.connectionGenes[0]);
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        genome.MutateAddNode(genome.getConns()[0]);
         
-        expect(genome.connectionGenes[1]).toBeDefined();
-        expect(genome.connectionGenes[1].in_node).toBe(genome.nodeGenes[0]);
-        expect(genome.connectionGenes[1].out_node).toBe(genome.nodeGenes[6]);
-        expect(genome.connectionGenes[1].enabled).toBe(true);
-        expect(genome.connectionGenes[2]).toBeDefined();
-        expect(genome.connectionGenes[2].in_node).toBe(genome.nodeGenes[6]);
-        expect(genome.connectionGenes[2].out_node).toBe(genome.nodeGenes[3]);
-        expect(genome.connectionGenes[2].enabled).toBe(true);
+        expect(genome.getConns()[1]).toBeDefined();
+        expect(genome.getConns()[1].in_node).toBe(genome.getNodes()[0]);
+        expect(genome.getConns()[1].out_node).toBe(genome.getNodes()[6]);
+        expect(genome.getConns()[1].enabled).toBe(true);
+        expect(genome.getConns()[2]).toBeDefined();
+        expect(genome.getConns()[2].in_node).toBe(genome.getNodes()[6]);
+        expect(genome.getConns()[2].out_node).toBe(genome.getNodes()[3]);
+        expect(genome.getConns()[2].enabled).toBe(true);
     });
 
 })

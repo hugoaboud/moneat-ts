@@ -1,13 +1,26 @@
 import { Genome } from "../src/Genome";
 import { Genome as GenomeConfig } from "./config";
 
-describe('Build from Genome', () => {
+describe('Genome Graph', () => {
 
-    test('just tryin some stuff', async () => {
+    test.skip('Empty walk should return all inputs', async () => {
         
-        let genome = new Genome(GenomeConfig(), 1, 1);
+    });
 
-        return expect(0).toBe(1);
+    test.skip('Second walk should return all nodes connected to input', async () => {
+        
+    });
+
+    test.skip('Third walk should return all nodes connected to second walk nodes', async () => {
+        
+    });
+
+})
+
+describe('Calc', () => {
+
+    test.skip('Should fail for wrong input data length', async () => {
+
     });
 
 })
