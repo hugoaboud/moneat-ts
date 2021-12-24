@@ -1,6 +1,14 @@
 import { Header } from "../src/cli/string";
 import { TrackTime } from "../src/util/Benchmark";
 
+/*
+    Benchmark: Iteration
+
+    Supports a design decision of using 'for' instead of 'map'
+    on performance-sensitive methods.
+
+*/
+
 console.log(Header('Benchmark: Iteration'))
 
 const N = 100000;
@@ -23,6 +31,11 @@ console.log();
 TrackTime('Array.map', () => {
     let a = 0;
     Data.map(d => a += d);
+}, RUNS);
+console.log();
+
+TrackTime('Array.reduce', () => {
+    Data.reduce((a,d) => a += d, 0);
 }, RUNS);
 console.log();
 

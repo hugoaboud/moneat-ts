@@ -7,25 +7,40 @@ export enum LogLevel {
     DEBUG
 };
 
+const LogColor = {
+    [LogLevel.ERROR]: 'red',
+    [LogLevel.INFO]: 'yellow',
+    [LogLevel.DEBUG]: 'lightpurple'
+}
+
 export default class Log {
     
     static Level = LogLevel.DEBUG
 
-    static Method(domain: object, inout: string, level: LogLevel) {
+    static Data(domain: object, alias: string, data: any, level: LogLevel) {
         if (level > this.Level) return;
+            
+        let origin = domain.constructor.name;
+        if (origin === 'Genome' || origin === 'NN_Walker') origin  += Colored(' ' + (domain as any).id, 'lightblue');
+
+        console.log(
+            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(origin, 'lightcyan') + '.' +
+            Colored(alias, 'lightpurple') + ': ' +
+            JSON.stringify(data)
+        )
+    }
     
-        let color = {
-            [LogLevel.ERROR]: 'red',
-            [LogLevel.INFO]: 'yellow',
-            [LogLevel.DEBUG]: 'lightgreen'
-        }[level];
-    
-        let name = domain.constructor.name;
-        if (name === 'Genome') name  += Colored(' ' + (domain as any).id, 'lightblue');
+    static Method(domain: object, alias: string, inout: string, level: LogLevel) {
+        if (level > this.Level) return;
+        
+        let origin = domain.constructor.name;
+        if (origin === 'Genome' || origin === 'NN_Walker') origin  += Colored(' ' + (domain as any).id, 'lightblue');
         
         console.log(
-            Colored(LogLevel[level], color) + ' ' +
-            Colored(name, 'lightcyan') + ': ' +
+            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(origin, 'lightcyan') + '.' +
+            Colored(alias, 'lightgreen') + ': ' +
             inout
         )
     
@@ -35,7 +50,7 @@ export default class Log {
         let nodes = genome.getNodes();
         let conns = genome.getConns();
     
-        console.log(Colored('Genome ', 'lightcyan') + Colored(genome.getID(), 'lightblue'));
+        console.log(Colored('Genome ', 'lightcyan') + Colored((genome as any).id, 'lightblue'));
         
         console.log(Colored('-nodes:', 'lightgray'));
         nodes.map((node,i) => {

@@ -8,12 +8,16 @@
   },
   "scripts": {
     "build": "rm -rf build/ && tsc",
+    "debug": "yarn build && node inspect",
     "cli": "yarn build && node build/cli.js",
 
     "test": "yarn build && node --trace-warnings node_modules/.bin/jest --runInBand --no-cache --verbose --silent",
 
     "benchmark:iter": "yarn build && node build/benchmark/IterationBenchmark",
-    "benchmark:network": "yarn build && node build/benchmark/NetworkBenchmark"
+    "benchmark:declaration": "yarn build && node build/benchmark/DeclarationBenchmark",
+    "benchmark:multivalues": "yarn build && node build/benchmark/MultiValuesBenchmark",
+    "benchmark:network": "yarn build && node build/benchmark/NetworkBenchmark",
+    "benchmark:numeric": "yarn build && node build/benchmark/NumericBenchmark"
   },
   "keywords": [
     "neuralnetwork",

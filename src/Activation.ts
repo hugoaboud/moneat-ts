@@ -10,6 +10,12 @@ export const Activation = {
     
     Linear(v: number) {
         return v;
+    },
+    
+    Clamped(v: number) {
+        if (v < -1) return -1;
+        if (v > 1) return 1;
+        return v;
     }
 
 }

@@ -122,7 +122,7 @@ export class Genome {
         if (outputs <= 0) throw GenomeException.ZeroOutputNodes();
 
         this.id = StringID();
-        Log.Method(this, `new(ins:${inputs},outs:${outputs})`, LogLevel.INFO);
+        Log.Method(this, 'new', `(ins:${inputs},outs:${outputs})`, LogLevel.INFO);
 
         for (let i = 0; i < inputs; i++) {
             this.nodes.push({
@@ -181,7 +181,7 @@ export class Genome {
             throw GenomeException.DuplicateConnection();
         })
         let innovation = Innovation.new;
-        Log.Method(this, `MutateAddConnection(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.INFO);
+        Log.Method(this,'MutateAddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.INFO);
 
         this.conns.push({ 
             in_node: in_node,
@@ -196,8 +196,8 @@ export class Genome {
         if (!conn.enabled) throw GenomeException.CantAddToDisabledConnection();
         
         let innovation_a = Innovation.new;
-        let innovation_b = Innovation.new;
-        Log.Method(this, `MutateAddNode(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.INFO);
+        let innovation_b = Innovation.new
+        Log.Method(this,'MutateAddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.INFO);
 
         conn.enabled = false;
 

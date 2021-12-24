@@ -1,12 +1,13 @@
 import { ConnectionGene, Genome, NodeGene } from "./Genome";
 import { Exception } from "./util/Exception";
+import { StringID } from "./util/Random";
 
-
-interface GenomeGraphNode {
-    node: NodeGene
-    inputs: NodeGene[]
+export interface GraphNode {
+    gene: NodeGene
+    conns: ConnectionGene[]
 }
-class GenomeGraph {
+
+export class Graph {
 
     protected nodes: NodeGene[]
     protected conns: ConnectionGene[]
@@ -21,14 +22,19 @@ class GenomeGraph {
         this.conns = this.genome.getConns();
     }
 
-    walk(): GenomeGraphNode[] {
+    Reset() {
+        this.last = undefined;
+        this.seen = [];
+    }
+
+    Walk(): GraphNode[] {
         
         // Step 0: return inputs
         if (!this.last) {
             this.last = this.genome.getInputs();
             return this.last.map(g => ({
-                node: g,
-                inputs: []
+                gene: g,
+                conns: []
             }));
         }
 
@@ -38,7 +44,7 @@ class GenomeGraph {
         }
 
         // Step 1+: walk on the graph
-        let next = {} as Record<number,GenomeGraphNode>;
+        let next = {} as Record<number,GraphNode>;
         
         for (let i = 0; i < this.conns.length; i++) {
             let conn = this.conns[i];
@@ -47,28 +53,31 @@ class GenomeGraph {
             
             if (this.last.indexOf(conn.in_node) >= 0) {
                 if (!next[conn.out_node.id])
-                    next[conn.out_node.id] = {node: conn.out_node, inputs:[]};    
+                    next[conn.out_node.id] = {gene: conn.out_node, conns:[]};    
             }
             
             if (next[conn.out_node.id])
-                next[conn.out_node.id].inputs.push(conn.in_node)
+                next[conn.out_node.id].conns.push(conn)
         }
         
         let nodes = Object.values(next);
-        this.last = nodes.map(n => n.node);
+        this.last = nodes.map(n => n.gene);
         return nodes;
     }
 
 }
 
-export abstract class Network {    
-    
+export abstract class NeuralNetwork {    
+
+    protected id: string
+
     protected inputs: number
     protected outputs: number
 
     constructor(
-        protected graph: GenomeGraph
+        protected graph: Graph
     ) {
+        this.id = StringID();
         this.inputs = graph.genome.getInputCount();
         this.outputs = graph.genome.getOutputCount();
     }
@@ -78,39 +87,6 @@ export abstract class Network {
         return this.Calc(input);
     }
     protected abstract Calc(input: number[]): number[]
-}
-
-/**
- * Network Implementations
- * These are preserved here for benchmark reasons.
- */
-
-interface RawGenomeNetworkNode extends NodeGene {
-    value: number
-}
-
-export class RawGenomeNetwork extends Network {
-
-    constructor(genome: Genome) {
-        super(new GenomeGraph(genome));
-    }
-
-    protected Calc(input: number[]): number[] {
-        
-        let inputs = this.graph.walk();
-        console.log(inputs.map(i => ({node: i.node.id, inputs: i.inputs.map(ii => ii.id)})));
-        
-        let layer = []
-        while (true) {
-            layer = this.graph.walk();
-            if (!layer.length) break;
-
-            console.log(layer.map(i => ({node: i.node.id, inputs: i.inputs.map(ii => ii.id)})));
-        }
-
-        return [];
-    }
-
 }
 
 /**
