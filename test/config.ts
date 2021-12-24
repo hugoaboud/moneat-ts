@@ -5,13 +5,18 @@ import { DeepPartial, Merge } from "../src/util/TestConfig";
 
 export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge({
     
+    inputs: 3,
+    outputs: 3,
+
     bias: DefaultMutableParamConfig(),
     weight: DefaultMutableParamConfig(),
     mult: DefaultMutableParamConfig(),
+    
     activation: {
         hidden: [Activation.Linear],
         output: [Activation.Linear]
     },
+    
     recurrent: true
     
 }, config);

@@ -31,11 +31,13 @@ function MutateAddConnection(genome: Genome, tries = 3) {
 }
 function NewGenome(): Genome {
     let genome = new Genome(GenomeConfig({
+        inputs: INPUTS,
+        outputs: OUTPUTS,
         activation: {   
             hidden: [Activation.Clamped],
             output: [Activation.Clamped]
         }
-    }), INPUTS, OUTPUTS);
+    }));
     for (let i = 0; i < MUTATIONS; i++) {
         MutateAddConnection(genome);
         genome.MutateAddNode(genome.RandomEnabledConnection());

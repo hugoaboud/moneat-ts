@@ -24,6 +24,8 @@ export abstract class BaseNeuralNetwork {
         return this.Calc(input);
     }
     protected abstract Calc(input: number[]): number[]
+
+    abstract Reset(): void
 }
 
 /**

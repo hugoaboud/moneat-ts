@@ -19,13 +19,17 @@ describe('Constructor', () => {
 
     test('Should fail for inputs <= 0', async () => {
         expect(() => {
-            new Genome(Config(),0,1);
+            new Genome(Config({
+                inputs: 0
+            }));
         }).toThrowError('E_GENOME: Number of input nodes should be greater than 0');
     });
 
     test('Should fail for outputs <= 0', async () => {
         expect(() => {
-            new Genome(Config(),1,0);
+            new Genome(Config({
+                outputs: 0
+            }));
         }).toThrowError('E_GENOME: Number of output nodes should be greater than 0');
     });
 
@@ -35,18 +39,18 @@ describe('Constructor', () => {
                 activation: {
                     output: []
                 }
-            }),1,1);
+            }));
         }).toThrowError('E_ACTIVATION: Trying to pick random activation from empty options list');
     });
 
     test('Should create input and output nodes', async () => {
-        let genome = new Genome(Config(),3,2);
+        let genome = new Genome(Config());
         let nodes = genome.getNodes();
-        expect(nodes).toHaveLength(5);
+        expect(nodes).toHaveLength(6);
         for (let i = 0; i < 3; i++) {
             expect(nodes[i].type).toBe('input');
         }
-        for (let i = 3; i < 5; i++) {
+        for (let i = 3; i < 6; i++) {
             expect(nodes[i].type).toBe('output');
             expect(nodes[i].activation).toBe(Activation.Linear);
         }
@@ -59,21 +63,21 @@ describe('Constructor', () => {
 describe('MutateAddConnection', () => {
 
     test('Should fail for output node as in_node', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         expect(() => {
             genome.MutateAddConnection(genome.getNodes()[3],genome.getNodes()[0]);
         }).toThrowError('E_GENOME: Connection can\'t be created from an output node');
     });
 
     test('Should fail for input node as out_node', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         expect(() => {
             genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[0]);
         }).toThrowError('E_GENOME: Connection can\'t be created to an input node');
     });
 
     test('Should add a connection', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         
         let connections = genome.getConns();
@@ -83,7 +87,7 @@ describe('MutateAddConnection', () => {
     });
 
     test('Should fail for duplicate connection', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         expect(() => {
             genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
@@ -95,7 +99,7 @@ describe('MutateAddConnection', () => {
 describe('MutateAddNode', () => {
 
     test('Should fail for disabled connection', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         let conn = genome.getConns()[0];
         conn.enabled = false;
@@ -105,7 +109,7 @@ describe('MutateAddNode', () => {
     });
 
     test('Should disable old connection', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         genome.MutateAddNode(genome.getConns()[0]);
         
@@ -119,7 +123,7 @@ describe('MutateAddNode', () => {
                 ...Config().activation,
                 hidden: []
             }
-        },3,3);
+        });
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         expect(() => {
             genome.MutateAddNode(genome.getConns()[0]);
@@ -127,7 +131,7 @@ describe('MutateAddNode', () => {
     });
 
     test('Should create a node', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         genome.MutateAddNode(genome.getConns()[0]);
         
@@ -136,7 +140,7 @@ describe('MutateAddNode', () => {
     });
 
     test('Should create two connections, to and from the node', async () => {
-        let genome = new Genome(Config(),3,3);
+        let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
         genome.MutateAddNode(genome.getConns()[0]);
         

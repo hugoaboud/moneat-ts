@@ -1,8 +1,8 @@
 import { Activation } from "./src/Activation";
 import { Header } from "./src/cli/string";
 import { Genome } from "./src/Genome";
-import { NeuralNetwork } from "./src/nn/Default";
-import { NeuralNetworkCompiler } from "./src/nn/DefaultCompiler";
+import { NeuralNetwork } from "./src/neuralnetwork/Default";
+import { NeuralNetworkCompiler } from "./src/neuralnetwork/DefaultCompiler";
 import { TrackTime } from "./src/util/Benchmark";
 import Log, { LogLevel } from "./src/util/Log";
 import { Genome as GenomeConfig } from "./test/config";
@@ -29,11 +29,13 @@ function MutateAddConnection(genome: Genome, tries = 3) {
 }
 function NewGenome(): Genome {
     let genome = new Genome(GenomeConfig({
+        inputs: INPUTS,
+        outputs: OUTPUTS,
         activation: {   
             hidden: [Activation.Clamped],
             output: [Activation.Clamped]
         }
-    }), INPUTS, OUTPUTS);
+    }));
     for (let i = 0; i < MUTATIONS; i++) {
         MutateAddConnection(genome);
         genome.MutateAddNode(genome.RandomEnabledConnection());

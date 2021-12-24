@@ -26,6 +26,9 @@ import { Gaussian, StringID } from "./util/Random";
 
 export interface IGenomeConfig {
 
+    inputs: number,
+    outputs: number,
+
     bias: IMutableParamConfig
     weight: IMutableParamConfig
     mult: IMutableParamConfig
@@ -114,17 +117,15 @@ export class Genome {
     private conns: ConnectionGene[] = []
 
     constructor(
-        protected config: IGenomeConfig,
-        protected inputs: number,
-        protected outputs: number
+        protected config: IGenomeConfig
     ) {
-        if (inputs <= 0) throw GenomeException.ZeroInputNodes();
-        if (outputs <= 0) throw GenomeException.ZeroOutputNodes();
+        if (config.inputs <= 0) throw GenomeException.ZeroInputNodes();
+        if (config.outputs <= 0) throw GenomeException.ZeroOutputNodes();
 
         this.id = StringID();
-        Log.Method(this, 'new', `(ins:${inputs},outs:${outputs})`, LogLevel.INFO);
+        Log.Method(this, 'new', `(ins:${config.inputs},outs:${config.outputs})`, LogLevel.INFO);
 
-        for (let i = 0; i < inputs; i++) {
+        for (let i = 0; i < config.inputs; i++) {
             this.nodes.push({
                 id: this.nodes.length,
                 type:'input',
@@ -134,7 +135,7 @@ export class Genome {
             })
         }
 
-        for (let i = 0; i < outputs; i++) {
+        for (let i = 0; i < config.outputs; i++) {
             this.nodes.push({
                 id: this.nodes.length,
                 type:'output',
@@ -232,7 +233,14 @@ export class Genome {
 
     /* Crossover */
     
-    Crossover(peer: Genome) {
+    Clone(): Genome {
+        let clone = new Genome(this.config);
+        clone.nodes = this.nodes;
+        clone.conns = this.conns;
+        return clone;
+    }
+
+    Crossover(peer: Genome): Genome {
         // When crossing over, the
         // genes in both genomes with the same innovation numbers are lined up. These genes
         // are called matching genes. Genes that do not match are either disjoint or excess, depend-
@@ -240,6 +248,7 @@ export class Genome {
         // numbers. They represent structure that is not present in the other genome.  In com-
         // posing the offspring/, genes are randomly chosen from either parent at matching genes,
         // whereas all excess or disjoint genes are always included from the more fit parent.
+        return this.Clone();
     }
 
     /* Getters */
@@ -248,9 +257,9 @@ export class Genome {
     public getNodes() { return this.nodes }
     public getConns() { return this.conns }
 
-    public getInputCount() { return this.inputs };
+    public getInputCount() { return this.config.inputs };
     public getInputs() { return this.nodes.filter(node => node.type === 'input') };
-    public getOutputCount() { return this.outputs };
+    public getOutputCount() { return this.config.outputs };
     public getOutputs() { return this.nodes.filter(node => node.type === 'output') };
 
 }

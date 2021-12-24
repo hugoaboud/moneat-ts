@@ -109,4 +109,9 @@ import Log, { LogLevel } from "../util/Log"
         return this.nodes.slice(this.inputs, this.inputs+this.outputs);
     }
 
+    Reset() {
+        for (let i = 0; i < this.nodes.length; i++)
+            this.nodes[i] = Math.random()*2-1;
+    }
+
 }
