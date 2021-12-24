@@ -1,14 +1,24 @@
-import { ActivationFunction } from "../../src/Activation"
-import { Genome } from "../../src/Genome"
-import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
-import Log, { LogLevel } from "../../src/util/Log"
+import { ActivationFunction } from "../Activation"
+import { Genome } from "../Genome"
+import { BaseNeuralNetwork } from "../NeuralNetwork"
+import Log, { LogLevel } from "../util/Log"
 
 /**
- * NeuralNetwork: StepList
- * This implementation walks the graph once during the build, saving
- * each step as a list of numbers. Then, it runs each step 
+ * 
+ * Default NeuralNetwork
+ * 
+ * This is the library default implementation of a neural network.
+ * It supports generic neurons, recursive connections and spiking activation.
+ * 
+ * An optimized model is built from the genome, which is then
+ * used to process input. It usually takes around 30~80us for each run.
+ * 
+ * It also allows you to compile the neural network into a single .js file, which
+ * can be imported and used anywhere.
+ * 
  */
- export class NN_StepList extends BaseNeuralNetwork {
+
+ export class NeuralNetwork extends BaseNeuralNetwork {
 
     // [0.value, 1.value, 2.value, ...]
     protected nodes: number[]
@@ -20,6 +30,11 @@ import Log, { LogLevel } from "../../src/util/Log"
     protected inputs: number
     protected outputs: number
 
+    /**
+     * Build a Neural Network from a Genome.
+     * @param genome 
+     * @returns 
+     */
     constructor(genome: Genome) {
         super(genome);
 
@@ -67,6 +82,12 @@ import Log, { LogLevel } from "../../src/util/Log"
 
     }
 
+    /**
+     * Calculate Neural Network output for given input.
+     * This alters the model inner state.
+     * @param input 
+     * @returns 
+     */
     protected Calc(input: number[]): number[] {
 
         // Input

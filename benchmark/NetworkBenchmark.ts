@@ -1,7 +1,6 @@
 import { Activation } from "../src/Activation";
 import { Header } from "../src/cli/string";
-import { Genome, NodeGene } from "../src/Genome";
-import { NeuralNetwork } from "../src/NeuralNetwork";
+import { Genome } from "../src/Genome";
 import { TrackTime } from "../src/util/Benchmark";
 import Log, { LogLevel } from "../src/util/Log";
 import { Genome as GenomeConfig } from "../test/config";
@@ -56,12 +55,12 @@ console.log(genome.getID());
 
 // Log.Genome(genome);
 
-// let walker = new NN_Walker(genome);
-// let out_walker = [] as number[];
-// TrackTime('Walker', (i) => {
-//     out_walker = walker.Run(Input[i]);
-// }, STEPS);
-// console.log(out_walker);
+let walker = new NN_Walker(genome);
+let out_walker = [] as number[];
+TrackTime('Walker', (i) => {
+    out_walker = walker.Run(Input[i]);
+}, STEPS);
+console.log(out_walker);
 
 let step_list = new NN_StepList(genome);
 let out_step_list = [] as number[];

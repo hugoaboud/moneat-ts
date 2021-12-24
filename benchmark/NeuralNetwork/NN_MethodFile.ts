@@ -1,20 +1,20 @@
 import * as fs from 'fs';
 import { Genome } from "../../src/Genome"
-import { Graph, NeuralNetwork } from "../../src/NeuralNetwork"
+import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
 
 /**
  * NeuralNetwork: StepList
  * This implementation walks the graph once during the build, saving
  * each step as a list of numbers. Then, it runs each step 
  */
- export class NN_MethodFile extends NeuralNetwork {
+ export class NN_MethodFile extends BaseNeuralNetwork {
 
     protected nn: {
         Run: (input: number[]) => number[]
     }
 
     constructor(genome: Genome) {
-        super(new Graph(genome));
+        super(genome);
 
         let id = genome.getID();
         let inputs = genome.getInputCount();

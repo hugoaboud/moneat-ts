@@ -1,5 +1,6 @@
 import { ConnectionGene, Genome, NodeGene } from "../../src/Genome";
-import { Graph, GraphNode, NeuralNetwork } from "../../src/NeuralNetwork";
+import { GraphNode } from "../../src/Graph";
+import { BaseNeuralNetwork } from "../../src/NeuralNetwork";
 import Log, { LogLevel } from "../../src/util/Log";
 
 
@@ -20,10 +21,10 @@ interface NN_Walker_GraphNode extends GraphNode {
  * This is the straight-forward implementation. It walks the Genome Graph
  * for each input point.
  */
-export class NN_Walker extends NeuralNetwork {
+export class NN_Walker extends BaseNeuralNetwork {
 
     constructor(genome: Genome) {
-        super(new Graph(genome));
+        super(genome);
     }
 
     protected Calc(input: number[]): number[] {
