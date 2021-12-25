@@ -1,6 +1,6 @@
 {
   "name": "moneat-ts",
-  "version": "0.0.5",
+  "version": "0.0.8",
   "description": "Multi-Object NeuroEvolution of Augmented Topologies",
   "main": "index.js",
   "directories": {

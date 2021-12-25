@@ -1,12 +1,13 @@
 import { Activation } from "../Activation";
 import { IEvolutionConfig } from "../Evolution";
-import { BinaryTournamentConfig, IBinaryTournamentConfig } from "../evolution/BinaryTournament";
+import { TournamentConfig, ITournamentConfig } from "../evolution/Tournament";
 import { IGenomeConfig, IMutableParamConfig } from "../Genome";
-import { INEATConfig, NEATConfig } from "../NEAT";
-import { NeuralNetwork } from "../neuralnetwork/Default";
+import { IMONEATConfig, MONEATConfig } from "../MONEAT";
+import { DNeuralNetwork } from "../neuralnetwork/Default";
+import { DeepPartial, Merge } from "./Config";
 
-export function DefaultMutableParamConfig(): IMutableParamConfig {
-    return {
+export function DefaultMutableParamConfig(config?: DeepPartial<IMutableParamConfig>): IMutableParamConfig {
+    return Merge({
         min: -30,
         max: 30,
         init: {
@@ -20,11 +21,11 @@ export function DefaultMutableParamConfig(): IMutableParamConfig {
                 replace: 0.1
             }
         }
-    }
+    }, config);
 }
 
-export function DefaultGenomeConfig(): IGenomeConfig {
-    return {
+export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenomeConfig {
+    return Merge({
         inputs: 2,
         outputs: 1,
 
@@ -38,23 +39,23 @@ export function DefaultGenomeConfig(): IGenomeConfig {
         },
 
         recurrent: false
-    }
+    }, config);
 }
 
-export function DefaultBinaryTournamentConfig(): IBinaryTournamentConfig {
-    return BinaryTournamentConfig({
+export function DefaultTournamentConfig(config?: DeepPartial<ITournamentConfig>): ITournamentConfig {
+    return Merge(TournamentConfig({
         elit: 2,
         death_rate: 0.5,
         crossover_rate: 0.7
-    })
+    }),config);
 }
 
-export function DefaultNEATConfig(): INEATConfig {
-    return NEATConfig({
+export function DefaultMONEATConfig(config?: DeepPartial<IMONEATConfig>): IMONEATConfig {
+    return Merge({
         population: 100,
         genome: DefaultGenomeConfig(),
-        network: NeuralNetwork,
+        network: DNeuralNetwork,
         fitness: [],
-        evolution: DefaultBinaryTournamentConfig()
-    })
+        evolution: DefaultTournamentConfig()
+    }, config);
 }

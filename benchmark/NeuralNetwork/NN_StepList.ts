@@ -1,6 +1,6 @@
 import { ActivationFunction } from "../../src/Activation"
 import { Genome } from "../../src/Genome"
-import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
+import { NeuralNetwork } from "../../src/NeuralNetwork"
 import Log, { LogLevel } from "../../src/util/Log"
 
 /**
@@ -8,7 +8,7 @@ import Log, { LogLevel } from "../../src/util/Log"
  * This implementation walks the graph once during the build, saving
  * each step as a list of numbers. Then, it runs each step 
  */
- export class NN_StepList extends BaseNeuralNetwork {
+ export class NN_StepList extends NeuralNetwork {
 
     // [0.value, 1.value, 2.value, ...]
     protected nodes: number[]
@@ -65,6 +65,11 @@ import Log, { LogLevel } from "../../src/util/Log"
             if (!layer.length) return;
         }
 
+    }
+
+    Reset() {
+        for (let i = 0; i < this.nodes.length; i++)
+            this.nodes[i] = Math.random()*2-1;
     }
 
     protected Calc(input: number[]): number[] {

@@ -1,6 +1,6 @@
 import { ConnectionGene, Genome, NodeGene } from "../../src/Genome";
 import { GraphNode } from "../../src/Graph";
-import { BaseNeuralNetwork } from "../../src/NeuralNetwork";
+import { NeuralNetwork } from "../../src/NeuralNetwork";
 import Log, { LogLevel } from "../../src/util/Log";
 
 
@@ -21,10 +21,16 @@ interface NN_Walker_GraphNode extends GraphNode {
  * This is the straight-forward implementation. It walks the Genome Graph
  * for each input point.
  */
-export class NN_Walker extends BaseNeuralNetwork {
+export class NN_Walker extends NeuralNetwork {
 
     constructor(genome: Genome) {
         super(genome);
+    }
+
+    Reset() {
+        let nodes = this.graph.genome.getNodes() as NN_Walker_Node[];
+        for (let i = 0; i < nodes.length; i++)
+            nodes[i].value = Math.random()*2-1;
     }
 
     protected Calc(input: number[]): number[] {

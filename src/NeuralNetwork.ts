@@ -2,7 +2,7 @@ import { Genome } from "./Genome";
 import { Graph } from "./Graph";
 import { Exception } from "./util/Exception";
 
-export abstract class BaseNeuralNetwork {    
+export abstract class NeuralNetwork {    
 
     protected id: string
 
@@ -17,6 +17,7 @@ export abstract class BaseNeuralNetwork {
         this.id = this.graph.genome.getID();
         this.inputs = this.graph.genome.getInputCount();
         this.outputs = this.graph.genome.getOutputCount();
+        this.Reset();
     }
 
     Run(input: number[]): number[] {

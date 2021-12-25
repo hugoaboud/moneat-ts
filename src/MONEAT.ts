@@ -1,23 +1,23 @@
 import Evolution, { IEvolutionConfig } from "./Evolution";
-import Fitness from "./Fitness";
+import {FitnessMethod} from "./Fitness";
 import { Genome, IGenomeConfig } from "./Genome"
-import { BaseNeuralNetwork } from "./NeuralNetwork";
+import { NeuralNetwork } from "./NeuralNetwork";
 
 /**
  * NEAT Configuration
  */
 
-export interface INEATConfig {
+export interface IMONEATConfig {
 
     population: number
     genome: IGenomeConfig
-    network: typeof BaseNeuralNetwork
-    fitness: (typeof Fitness)[]
+    network: typeof NeuralNetwork
+    fitness: FitnessMethod[]
     evolution: IEvolutionConfig
     
 }
 
-export function NEATConfig(config: INEATConfig) {return config;}
+export function MONEATConfig(config: IMONEATConfig) {return config;}
 
 /**
  * An individual of the population
@@ -25,7 +25,7 @@ export function NEATConfig(config: INEATConfig) {return config;}
 
 export interface Individual {
     genome: Genome,
-    network: BaseNeuralNetwork,
+    network: NeuralNetwork,
     fitness: number[]
 }
 
@@ -33,12 +33,12 @@ export interface Individual {
  * NEAT
  */
 
-export default class NEAT {
+export default class MONEAT {
 
     protected population: Individual[] = []
 
     constructor(
-        protected config: INEATConfig
+        protected config: IMONEATConfig
     ) {
         this.Reset();
     }
@@ -51,38 +51,42 @@ export default class NEAT {
         } as Individual))
     }
 
-    Evolve(input: number[][], epochs: number) {
+    ResetNetworkAndFitness(ind: Individual) {
+        ind.network = new (this.config.network as any)(ind.genome)
+        ind.fitness = []
+    }
 
-        this.population.map(ind => {
-            ind.network = new (this.config.network as any)(ind.genome)
-            ind.fitness = []
-        });
+    Evolve(epochs: number) {
         
+        // Evolve individuals
         let evolution = new (this.config.evolution.class as any)(this.config.evolution, this.config.genome)
-
         for (let e = 0; e < epochs; e++) {
-        
-            // Run all networks
-            for (let n = 0; n < this.population.length; n++) {
-                let network = this.population[n].network;
-                network.Reset();
-                for (let i = 0; i < input.length; i++) {
-                    network.Run(input[i]);
-                }
-            }
+
+            // Reset networks and fitnesses
+            this.population.map(ind => this.ResetNetworkAndFitness(ind));
 
             // Calculate fitnesses
             for (let f = 0; f < this.config.fitness.length; f++) {
-                let fit = new (this.config.fitness[f] as any)(input);
+                let method = this.config.fitness[f];
                 for (let n = 0; n < this.population.length; n++) {
-                    this.population[n].fitness[f] = fit.Calc(this.population[n].network);
+                    this.population[n].fitness[f] = method(this.population[n].network);
                 }
             }
 
+            // Don't evolve last population
+            if (e == epochs-1) break;
+
             // Evolution epoch
             this.population = evolution.Epoch(this.population);
+
         }
 
+        return this.Output();
+
+    }
+
+    Output() {
+        return this.population;
     }
 
 }

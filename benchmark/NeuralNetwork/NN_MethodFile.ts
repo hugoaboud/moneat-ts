@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import { Genome } from "../../src/Genome"
-import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
+import { NeuralNetwork } from "../../src/NeuralNetwork"
 
 /**
  * NeuralNetwork: StepList
  * This implementation walks the graph once during the build, saving
  * each step as a list of numbers. Then, it runs each step 
  */
- export class NN_MethodFile extends BaseNeuralNetwork {
+ export class NN_MethodFile extends NeuralNetwork {
 
     protected nn: {
         Run: (input: number[]) => number[]
@@ -79,6 +79,8 @@ import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
         let nn_class = require(__dirname+'/../../../out/'+genome.getID());
         this.nn = nn_class;
     }
+
+    Reset() {}
 
     protected Calc(input: number[]): number[] {
         return (this.nn as any)(input);

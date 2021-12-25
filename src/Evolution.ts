@@ -1,5 +1,5 @@
 import { Genome, IGenomeConfig } from "./Genome";
-import Population, { Individual } from "./NEAT";
+import Population, { Individual } from "./MONEAT";
 
 export interface IEvolutionConfig {
     class: typeof Evolution

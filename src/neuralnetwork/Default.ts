@@ -1,6 +1,7 @@
 import { ActivationFunction } from "../Activation"
-import { Genome } from "../Genome"
-import { BaseNeuralNetwork } from "../NeuralNetwork"
+import { ConnectionGene, Genome, NodeGene } from "../Genome"
+import { GraphNode } from "../Graph"
+import { NeuralNetwork } from "../NeuralNetwork"
 import Log, { LogLevel } from "../util/Log"
 
 /**
@@ -18,68 +19,84 @@ import Log, { LogLevel } from "../util/Log"
  * 
  */
 
- export class NeuralNetwork extends BaseNeuralNetwork {
+ export class DNeuralNetwork extends NeuralNetwork {
 
     // [0.value, 1.value, 2.value, ...]
-    protected nodes: number[]
+    protected nodes!: number[]
     // [0.activation, 1.activation, ...]
-    protected actvs: ActivationFunction[]
+    protected actvs!: ActivationFunction[]
     // [n, 0.id, weight, 1.id, weight, ..., mult, bias, out.id]
-    protected steps: number[][]
+    protected steps!: number[][]
 
     protected inputs: number
     protected outputs: number
 
     /**
-     * Build a Neural Network from a Genome.
-     * @param genome 
-     * @returns 
+     * Resets the node states
+     * This is run when the network is created
      */
+    Reset() {
+        for (let i = 0; i < this.nodes.length; i++)
+            this.nodes[i] = Math.random()*2-1;
+    }
+
+    
     constructor(genome: Genome) {
         super(genome);
 
         this.inputs = genome.getInputCount();
         this.outputs = genome.getOutputCount();
 
-        // Map nodes and activations
-        let nodes = genome.getNodes();
+        this.Build();
+    }
+
+    /**
+     * Build a Neural Network from a Genome.
+     * @param genome 
+     * @returns 
+     */
+    protected Build() {
+        this.BuildNodesAndActivations();
+        this.graph.Walk();
+        this.steps = [];
+        while (true) {
+            let layer = this.graph.Walk();
+            if (!layer.length) return;
+            this.BuildStepLayer(layer);
+        }
+    }
+    protected BuildNodesAndActivations() {
+        let nodes = this.graph.genome.getNodes();
         this.nodes = Array(nodes.length).fill(0);
 
         this.actvs = [];
         for (let i = 0; i < nodes.length; i++) {
             this.actvs.push(nodes[i].activation);
         }
-        
-        // Inputs   
-        this.graph.Walk();
-        
-        // Layers to Steps
-        this.steps = [];
-        while (true) {
-            let layer = this.graph.Walk();
-
-            for (let n = 0; n < layer.length; n++) {
-                let node = layer[n].gene;
-                let conns = layer[n].conns;
-                
-                let step = [conns.length];
-                for (let i = 0; i < conns.length; i++) {
-                    step.push(conns[i].in_node.id);
-                    step.push(conns[i].weight.value);
-                }
-                step.push(node.mult.value);
-                step.push(node.bias.value);
-                step.push(node.id);
-
-                if (Log.Level === LogLevel.DEBUG)
-                    Log.Data(this,'step',step, LogLevel.DEBUG);
-                
-                this.steps.push(step);
-            }
+    }
+    protected BuildStepLayer(layer: GraphNode[]) {
+        for (let n = 0; n < layer.length; n++) {
+            let node = layer[n].gene;
+            let conns = layer[n].conns;
             
-            if (!layer.length) return;
+            let step = this.BuildStep(node, conns);
+            this.steps.push(step);
         }
+    }
+    protected BuildStep(node: NodeGene, conns: ConnectionGene[]) {
+        let step = [conns.length];
+        for (let i = 0; i < conns.length; i++) {
+            step.push(conns[i].in_node.id);
+            step.push(conns[i].weight.value);
+        }
+        step.push(node.mult.value);
+        step.push(node.bias.value);
+        step.push(node.id);
 
+        if (Log.Level === LogLevel.DEBUG)
+            Log.Data(this,'step',step, LogLevel.DEBUG);
+            
+        return step;
     }
 
     /**
@@ -107,11 +124,6 @@ import Log, { LogLevel } from "../util/Log"
         }
 
         return this.nodes.slice(this.inputs, this.inputs+this.outputs);
-    }
-
-    Reset() {
-        for (let i = 0; i < this.nodes.length; i++)
-            this.nodes[i] = Math.random()*2-1;
     }
 
 }

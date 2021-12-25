@@ -7,7 +7,7 @@ import { Graph } from '../Graph';
  * @param genome 
  * @returns 
  */
-export function NeuralNetworkCompiler(genome: Genome): string {
+export function DNeuralNetworkCompiler(genome: Genome): string {
 
     let graph = new Graph(genome);
     let id = genome.getID();

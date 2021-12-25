@@ -179,7 +179,7 @@ export class Genome {
         if (out_node.type === 'input') throw GenomeException.CantConnectToInput();
         this.conns.map(conn => {
             if (conn.in_node == in_node && conn.out_node == out_node)
-            throw GenomeException.DuplicateConnection();
+                throw GenomeException.DuplicateConnection();
         })
         let innovation = Innovation.new;
         Log.Method(this,'MutateAddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.INFO);
@@ -235,8 +235,8 @@ export class Genome {
     
     Clone(): Genome {
         let clone = new Genome(this.config);
-        clone.nodes = this.nodes;
-        clone.conns = this.conns;
+        clone.nodes = this.nodes.slice();
+        clone.conns = this.conns.slice();
         return clone;
     }
 

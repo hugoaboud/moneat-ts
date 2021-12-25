@@ -1,8 +1,3 @@
-import { BaseNeuralNetwork } from "./NeuralNetwork";
+import { NeuralNetwork } from "./NeuralNetwork";
 
-export default abstract class Fitness {
-
-    constructor(protected input: number[][]) {}
-    abstract Calc(network: BaseNeuralNetwork): number
-
-}
+export type FitnessMethod = (network: NeuralNetwork) => number

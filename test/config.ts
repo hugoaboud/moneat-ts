@@ -1,7 +1,7 @@
 import { Activation } from "../src/Activation";
 import { IGenomeConfig, IMutableParamConfig } from "../src/Genome";
 import { DefaultMutableParamConfig } from "../src/util/Defaults";
-import { DeepPartial, Merge } from "../src/util/TestConfig";
+import { DeepPartial, Merge } from "../src/util/Config";
 
 export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge({
     

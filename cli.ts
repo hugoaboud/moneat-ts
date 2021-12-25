@@ -1,8 +1,8 @@
 import { Activation } from "./src/Activation";
 import { Header } from "./src/cli/string";
 import { Genome } from "./src/Genome";
-import { NeuralNetwork } from "./src/neuralnetwork/Default";
-import { NeuralNetworkCompiler } from "./src/neuralnetwork/DefaultCompiler";
+import { DNeuralNetwork } from "./src/neuralnetwork/Default";
+import { DNeuralNetworkCompiler } from "./src/neuralnetwork/DefaultCompiler";
 import { TrackTime } from "./src/util/Benchmark";
 import Log, { LogLevel } from "./src/util/Log";
 import { Genome as GenomeConfig } from "./test/config";
@@ -52,11 +52,11 @@ console.log(genome.getID());
 //Log.Genome(genome);	
 
 let defaul = {
-    nn: new NeuralNetwork(genome),
+    nn: new DNeuralNetwork(genome),
     out: [] as number[]
 };
 
-let compiled_path = __dirname+'/../'+NeuralNetworkCompiler(genome);
+let compiled_path = __dirname+'/../'+DNeuralNetworkCompiler(genome);
 delete require.cache[compiled_path];
 
 let compiled = {

@@ -1,7 +1,7 @@
 //@ts-nocheck
 import * as fs from 'fs';
 import { Genome } from "../../src/Genome"
-import { BaseNeuralNetwork } from "../../src/NeuralNetwork"
+import { NeuralNetwork } from "../../src/NeuralNetwork"
 
 const run = (inputs, outputs) => `function Run(input) {
     for (let i = 0; i < INPUTS; i++) n[i] = input[i];
@@ -25,7 +25,7 @@ const run = (inputs, outputs) => `function Run(input) {
  * This implementation walks the graph once during the build, saving
  * each step as a list of numbers. Then, it runs each step 
  */
- export class NN_CacheMethodFile extends BaseNeuralNetwork {
+ export class NN_CacheMethodFile extends NeuralNetwork {
 
     protected nn: (input: number[]) => number[]
 
@@ -96,6 +96,8 @@ const run = (inputs, outputs) => `function Run(input) {
         //this.nn = new nn_class();
         this.nn = require(__dirname+'/../../../out/'+id);
     }
+
+    Reset() {}
 
     protected Calc(input: number[]): number[] {
         return this.nn(input);

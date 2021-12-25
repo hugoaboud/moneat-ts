@@ -76,6 +76,22 @@ describe('MutateAddConnection', () => {
         }).toThrowError('E_GENOME: Connection can\'t be created to an input node');
     });
 
+    test('Should fail for duplicate connection', async () => {
+        let genome = new Genome(Config());
+        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        expect(() => {
+            genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        }).toThrowError('E_GENOME: Can\'t create duplicate connection');
+    });
+
+    test.skip('Should fail for immediate recurrent connection on feed-forward genomes', async () => {
+        
+    });
+
+    test.skip('Should fail for transitive recurrent connection on feed-forward genomes', async () => {
+        
+    });
+
     test('Should add a connection', async () => {
         let genome = new Genome(Config());
         genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
@@ -84,14 +100,6 @@ describe('MutateAddConnection', () => {
         expect(connections.length).toBe(1);
         expect(connections[0].enabled).toBe(true);
         expect(connections[0].innovation).toBe(Innovation.last);
-    });
-
-    test('Should fail for duplicate connection', async () => {
-        let genome = new Genome(Config());
-        genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-        expect(() => {
-            genome.MutateAddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-        }).toThrowError('E_GENOME: Can\'t create duplicate connection');
     });
 
 })
@@ -155,3 +163,29 @@ describe('MutateAddNode', () => {
     });
 
 })
+
+describe('Clone', () => {
+
+    test.skip('Should create a new genome with new ID', async () => {
+        
+    });
+
+    test.skip('Clone nodes should not reference original nodes', async () => {
+        
+    });
+
+    test.skip('Clone connections should not reference original connections', async () => {
+        
+    });
+
+});
+
+describe('Crossover', () => {
+
+    test.skip('Should create a new genome with new ID', async () => {
+        
+    });
+
+    // ... neat crossover stuff (innovation, etc)
+
+});
