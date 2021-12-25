@@ -1,4 +1,4 @@
-import { Header } from "../src/cli/string";
+import { Header } from "../src/cli/String";
 import { TrackTime } from "../src/util/Benchmark";
 
 /*

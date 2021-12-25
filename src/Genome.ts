@@ -1,5 +1,4 @@
-import { Activation, ActivationFunction, RandomActivation } from "./Activation";
-import { Colored } from "./cli/string";
+import { ActivationFunction, RandomActivation } from "./Activation";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
 import { Gaussian, StringID } from "./util/Random";

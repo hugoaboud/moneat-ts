@@ -1,4 +1,4 @@
-import { Colored } from "../cli/string";
+import { Colored } from "../cli/String";
 
 export function TrackTime(title: string, fn: (i: number) => void, runs: number): void {
 

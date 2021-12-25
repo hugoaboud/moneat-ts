@@ -1,4 +1,4 @@
-import { Colored } from "../cli/string";
+import { Colored } from "../cli/String";
 import { Genome } from "../Genome";
 
 export enum LogLevel {

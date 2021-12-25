@@ -1,5 +1,5 @@
 import { Activation } from "./src/Activation";
-import { Header } from "./src/cli/string";
+import { Header } from "./src/cli/String";
 import { Genome } from "./src/Genome";
 import { DNeuralNetwork } from "./src/neuralnetwork/Default";
 import { DNeuralNetworkCompiler } from "./src/neuralnetwork/DefaultCompiler";
