@@ -6,9 +6,14 @@
  * the CLI or (even better) copy it into a file and try it out!
  */
 
+import { Header } from "../../src/cli/String";
 import MONEAT from "../../src/MONEAT";
 import { NeuralNetwork } from "../../src/NeuralNetwork";
 import { DefaultMONEATConfig } from "../../src/util/Defaults";
+import Log, { LogLevel } from "../../src/util/Log";
+
+//Log.Level = LogLevel.DEBUG
+console.log(Header('Example: XOR'))
 
 /*
     NeuroEvolution allows you to define really 'abstract' challenges for a network, unlike
@@ -31,9 +36,9 @@ const Input = [ [0,0],[0,1],[1,0],[1,1] ]
 const Output = [ 0,1,1,0 ]
 
 function XOR(network: NeuralNetwork): number {
-    let e = 8;
+    let e = 0;
     for (let i = 0; i < Input.length; i++) {
-        let out = network.Run(Input[i]);
+        let out = network.Run(Input[i], true);
         e -= Math.abs(out[0] - Output[i]);
     }
     return e;
@@ -50,5 +55,14 @@ const Config = DefaultMONEATConfig({
     fitness: [XOR]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(100);
-console.dir(population[0],{depth:null});
+let population = MoNeat.Evolve(1000);
+
+let winner = population[0];
+
+console.log(XOR(winner.network));
+console.log(winner.fitness);
+
+console.log('0 , 0 => ' + winner.network.Run([0,0], true));
+console.log('0 , 1 => ' + winner.network.Run([0,1], true));
+console.log('1 , 0 => ' + winner.network.Run([1,0], true));
+console.log('1 , 1 => ' + winner.network.Run([1,1], true));

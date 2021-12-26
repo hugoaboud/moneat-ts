@@ -44,12 +44,14 @@ export interface Individual {
     genome: Genome
     network: NeuralNetwork
     fitness: number[]
+    shared_fitness: number[]
 }
 
 export interface Species {
     representative: Individual
     population: Individual[]
     fitness: number[]
+    avg_dist: number
 }
 
 /**
@@ -76,7 +78,8 @@ export default class MONEAT {
         this.population = Array.from({length: this.config.population}, () => ({
             genome: new Genome(this.config.genome),
             network: null as any,
-            fitness: []
+            fitness: [],
+            shared_fitness: []
         } as Individual))
         this.Speciate();
     }
@@ -84,6 +87,7 @@ export default class MONEAT {
     ResetNetworkAndFitness(ind: Individual) {
         ind.network = new (this.config.network as any)(ind.genome)
         ind.fitness = []
+        ind.shared_fitness = []
     }
 
     /*
@@ -111,10 +115,6 @@ export default class MONEAT {
         let c2 = this.config.species.compatibility.disjoint_coeff;
         let c3 = this.config.species.compatibility.weights_coeff;
 
-        console.log({
-            E, D, W, N, c1, c2, c3, result: (c1*E)/N + (c2*D)/N + c3*W
-        });
-
         return (c1*E)/N + (c2*D)/N + c3*W;
     }
 
@@ -124,7 +124,8 @@ export default class MONEAT {
         let species = this.species.map((s, i) => ({
             representative: s.population[Math.floor(Math.random()*s.population.length)],
             population: [],
-            fitness: Array(this.config.fitness.length).fill(0)
+            fitness: Array(this.config.fitness.length).fill(0),
+            avg_dist: 0
         })) as Species[];
 
         // Assign each individual to an species
@@ -136,6 +137,7 @@ export default class MONEAT {
                 let dist = this.CompatibilityDistance(ind.genome, s.representative.genome);
                 if (dist <= this.config.species.compatibility.threshold) {
                     species[j].population.push(ind);
+                    species[j].avg_dist += dist;
                     match = true;
                     break;
                 }
@@ -144,13 +146,19 @@ export default class MONEAT {
                 species.push({
                     representative: ind,
                     population: [ind],
-                    fitness: Array(this.config.fitness.length).fill(0)
+                    fitness: Array(this.config.fitness.length).fill(0),
+                    avg_dist: 0
                 })
             }
         }
 
         // Filter empty species
         this.species = species.filter(s => s.population.length);
+
+        // Average distance
+        this.species.map(species => {
+            species.avg_dist /= species.population.length;
+        })
     }
 
     /** 
@@ -164,9 +172,10 @@ export default class MONEAT {
             for (let j = 0; j < sn; j++) {
                 let ind = s.population[j];
 
-                ind.fitness.map((f,i) => {
-                    ind.fitness[i] = f/sn;
-                    s.fitness[i] += ind.fitness[i];
+                ind.shared_fitness = ind.fitness.map((f,k) => {
+                    let fit = f/sn;
+                    s.fitness[k] += fit;
+                    return fit;
                 });
             }
         }
@@ -193,10 +202,14 @@ export default class MONEAT {
                 }
             }
             this.ShareFitnesses();
+            this.ReportFitness();
 
-            // Don't evolve last population
-            if (e == epochs-1) break;
-
+            // Don't evolve last population, but return it sorted
+            if (e == epochs-1) {
+                this.population = evolution.Sort(this.population);
+                break;
+            }
+            
             // Evolution epoch
             this.population = evolution.Epoch(this);
             this.Speciate();
@@ -204,6 +217,30 @@ export default class MONEAT {
 
         return this.Output();
 
+    }
+
+    ReportFitness() {
+        let best = Array(this.config.fitness.length).fill(-Infinity);
+        let sum = Array(this.config.fitness.length).fill(0);
+        this.population.map(ind => {
+            ind.fitness.map((f,i) => {
+                if (f > best[i]) best[i] = f;
+                sum[i] += f;
+            })
+        })
+        let avg = sum.map(f => f/this.population.length);
+        Log.Data(this, 'Fitness', {
+            best,
+            avg
+        }, LogLevel.INFO)
+        this.species.map((species,i) => {
+            Log.Data(this, `Species.${i}`, {
+                pop: species.population.length,
+                fitness: species.fitness,
+                avg_dist: species.avg_dist
+            }, LogLevel.INFO);
+        })
+        
     }
 
     Output() {

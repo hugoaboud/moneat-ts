@@ -19,8 +19,9 @@ export abstract class NeuralNetwork {
         this.outputs = this.graph.genome.getOutputCount();
     }
 
-    Run(input: number[]): number[] {
+    Run(input: number[], reset=false): number[] {
         if (input.length != this.inputs) throw NetworkException.WrongInputLength(this.inputs, input.length);
+        if (reset) this.Reset();
         return this.Calc(input);
     }
     protected abstract Calc(input: number[]): number[]

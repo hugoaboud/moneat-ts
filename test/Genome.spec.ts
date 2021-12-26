@@ -1,5 +1,6 @@
 import { Activation } from "../src/Activation";
 import { ConnectionGene, Genome, Innovation } from "../src/Genome";
+import Log from "../src/util/Log";
 import { Genome as Config } from "./config";
 
 
@@ -257,26 +258,76 @@ describe('Mutation', () => {
             }).toThrowError('E_GENOME: Can\'t remove an output node');
         });
 
+        // 0 → 6(x) -> 7 → 3
+        // 1               4
+        // 2               5
         test('Should remove node gene from genome', async () => {
             let genome = new Genome(Config());
-            genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-            genome.AddNode(genome.getConns()[0]);
-            genome.AddNode(genome.getConns()[1]);
-            expect(genome.getNodes().length).toBe(8);
-            genome.RemoveNode(genome.getNodes()[6]);
-            expect(genome.getNodes().length).toBe(7);
+            let nodes = genome.getNodes();
+            let conns = genome.getConns();
+            genome.AddConnection(nodes[0],nodes[3]);
+            genome.AddNode(conns[0]);
+            genome.AddNode(conns[1]);
+            expect(nodes.length).toBe(8);
+            genome.RemoveNode(nodes[6]);
+            expect(nodes.length).toBe(7);
         });
     
+        // 0 → 6(x) → 3   
+        // 1      ↘ → 4
+        // 2      ↘ → 5
         test('Should remove all connections from/to node', async () => {
             let genome = new Genome(Config());
-            genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-            genome.AddNode(genome.getConns()[0]);
-            genome.AddConnection(genome.getNodes()[6],genome.getNodes()[4]);
-            genome.AddConnection(genome.getNodes()[6],genome.getNodes()[5]);
-            expect(genome.getConns().length).toBe(5);
-            genome.RemoveNode(genome.getNodes()[6]);
-            expect(genome.getConns().length).toBe(1);
-        });    
+            let nodes = genome.getNodes();
+            let conns = genome.getConns();
+            genome.AddConnection(nodes[0],nodes[3]);
+            genome.AddNode(conns[0]);
+            genome.AddConnection(nodes[6],nodes[4]);
+            genome.AddConnection(nodes[6],nodes[5]);
+            expect(conns.length).toBe(5);
+            genome.RemoveNode(nodes[6]);
+            conns = genome.getConns();
+            expect(conns.length).toBe(1);
+        }); 
+        
+        // 0 → 4(x) → 5(4) → 2
+        //          ↗  ↓        
+        // 1  →  →    6(5) → 3
+        test('Should update ids on nodes and connections to ensure id == indexOf', async () => {
+            let genome = new Genome(Config({
+                inputs: 2,
+                outputs: 2
+            }));
+            let nodes = genome.getNodes();
+            let conns = genome.getConns();
+            genome.AddConnection(nodes[0],nodes[2]);
+            genome.AddNode(conns[0]); // 4
+            genome.AddNode(conns[2]); // 5
+            genome.AddConnection(nodes[1],nodes[5]);
+            genome.AddConnection(nodes[5],nodes[3]);
+            genome.AddNode(conns[6]); // 6
+            let n5 = nodes[5];
+            let n6 = nodes[6];
+            let c3 = conns[3];
+            let c4 = conns[4];
+            let c6 = conns[6];
+            let c7 = conns[7];
+            let c8 = conns[8];
+            Log.Genome(genome);
+            genome.RemoveNode(nodes[4]);
+            Log.Genome(genome);
+            conns = genome.getConns();
+            expect(n5).toBe(nodes[4]);
+            expect(n5.id).toEqual(4);
+            expect(n6).toBe(nodes[5]);
+            expect(n6.id).toEqual(5);
+            expect(c3.out_node.id).toEqual(4);
+            expect(c4.in_node.id).toEqual(4);
+            expect(c6.in_node.id).toEqual(4);
+            expect(c7.in_node.id).toEqual(4);
+            expect(c7.out_node.id).toEqual(5);
+            expect(c8.in_node.id).toEqual(5);
+        }); 
     });
 })
 

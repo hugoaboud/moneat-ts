@@ -216,6 +216,7 @@ export class Genome {
             if (cb_i >= 0) {
                 let cb = conns.b[cb_i];
                 b_matches.push(cb_i);
+                if (!ca.enabled && !cb.enabled) continue;
                 let m = (ca.enabled?[ca]:[]).concat(cb.enabled?[cb]:[]);
                 matching.push(m);
                 continue;
@@ -336,6 +337,7 @@ export class Genome {
         if (n < this.config.inputs) throw GenomeException.CantRemoveInputNode();
         if (n < this.config.inputs+this.config.outputs) throw GenomeException.CantRemoveOutputNode();
 
+        this.nodes.slice(n).map(node => node.id--);
         this.nodes.splice(n,1);
         this.conns = this.conns.filter(conn =>
             conn.in_node != node && conn.out_node != node )
