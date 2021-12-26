@@ -2,7 +2,7 @@ import { ConnectionGene, Genome, NodeGene } from "./Genome";
 
 export interface GraphNode {
     gene: NodeGene
-    conns: ConnectionGene[]
+    inputs: ConnectionGene[]
 }
 
 export class Graph {
@@ -32,7 +32,7 @@ export class Graph {
             this.last = this.genome.getInputs();
             return this.last.map(g => ({
                 gene: g,
-                conns: []
+                inputs: []
             }));
         }
 
@@ -51,11 +51,11 @@ export class Graph {
             
             if (this.last.indexOf(conn.in_node) >= 0) {
                 if (!next[conn.out_node.id])
-                    next[conn.out_node.id] = {gene: conn.out_node, conns:[]};    
+                    next[conn.out_node.id] = {gene: conn.out_node, inputs:[]};    
             }
             
             if (next[conn.out_node.id])
-                next[conn.out_node.id].conns.push(conn)
+                next[conn.out_node.id].inputs.push(conn)
         }
         
         let nodes = Object.values(next);

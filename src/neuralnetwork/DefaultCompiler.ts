@@ -36,7 +36,7 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
         for (let n = 0; n < layer.length; n++) {
             let cmd = [];
             let node = layer[n].gene;
-            let conns = layer[n].conns;
+            let conns = layer[n].inputs;
             
             cmd.push(conns.length);
             for (let i = 0; i < conns.length; i++) {

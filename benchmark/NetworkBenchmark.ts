@@ -24,7 +24,7 @@ function MutateAddConnection(genome: Genome, tries = 3) {
     for (let i = 0; i < tries; i++) {
         try {
             let pair = genome.RandomNodePair()
-            genome.MutateAddConnection(pair[0], pair[1]);
+            genome.AddConnection(pair[0], pair[1]);
             return;
         } catch {}
     }
@@ -40,7 +40,7 @@ function NewGenome(): Genome {
     }));
     for (let i = 0; i < MUTATIONS; i++) {
         MutateAddConnection(genome);
-        genome.MutateAddNode(genome.RandomEnabledConnection());
+        genome.AddNode(genome.RandomEnabledConnection());
         MutateAddConnection(genome);
         //MutateAddConnection(genome);
         //MutateAddConnection(genome);

@@ -102,7 +102,7 @@ describe('Mutation', () => {
             mutation: {
                 prob: {
                     offset: 0,
-                    replace: 0.5
+                    replace: 0.2
                 }
             }
         }));
@@ -118,14 +118,14 @@ describe('Mutation', () => {
             if (mutate()) mutations++;
         }
 
-        expect(mutations/steps).toBeCloseTo(0.5, 1);
+        expect(mutations/steps).toBeCloseTo(0.2, 1);
     })
 
     test('Should run offset mutation according to probability', () => {
         let param = new MutableParam(Config({
             mutation: {
                 prob: {
-                    offset: 0.5,
+                    offset: 0.2,
                     replace: 0
                 }
             }
@@ -142,7 +142,7 @@ describe('Mutation', () => {
             if (mutate()) mutations++;
         }
 
-        expect(mutations/steps).toBeCloseTo(0.5, 1);
+        expect(mutations/steps).toBeCloseTo(0.2, 1);
     })
 
 })

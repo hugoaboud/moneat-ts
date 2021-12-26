@@ -1,31 +1,21 @@
 import { Activation } from "../src/Activation";
-import { Genome } from "../src/Genome";
-import { Genome as GenomeConfig } from "./config";
 
-describe('Linear', () => {
 
-    test('-999 => -999',() => { expect(Activation.Linear(-999)).toBe(-999) });
-    test('-1   => -1'  ,() => { expect(Activation.Linear(-1  )).toBe(-1  ) });
-    test('-0.5 => -0.5',() => { expect(Activation.Linear(-0.5)).toBe(-0.5) });
-    test('-0.1 => -0.1',() => { expect(Activation.Linear(-0.1)).toBe(-0.1) });
-    test('0    => 0'   ,() => { expect(Activation.Linear(0   )).toBe(0   ) });
-    test('0.1  => 0.1' ,() => { expect(Activation.Linear(0.1 )).toBe(0.1 ) });
-    test('0.5  => 0.5' ,() => { expect(Activation.Linear(0.5 )).toBe(0.5 ) });
-    test('1    => 1'   ,() => { expect(Activation.Linear(1   )).toBe(1   ) });
-    test('999  => 999' ,() => { expect(Activation.Linear(999 )).toBe(999 ) });
+const Input = [-999,-99,-9,-1,-0.5,-0.1,0,0.1,0.5,1,9,99,999];
 
-})
 
-describe('Clamped', () => {
+describe('Functions', () => {
 
-    test('-999 => -1'  ,() => { expect(Activation.Clamped(-999)).toBe(-1) });
-    test('-1   => -1'  ,() => { expect(Activation.Clamped(-1  )).toBe(-1  ) });
-    test('-0.5 => -0.5',() => { expect(Activation.Clamped(-0.5)).toBe(-0.5) });
-    test('-0.1 => -0.1',() => { expect(Activation.Clamped(-0.1)).toBe(-0.1) });
-    test('0    => 0'   ,() => { expect(Activation.Clamped(0   )).toBe(0   ) });
-    test('0.1  => 0.1' ,() => { expect(Activation.Clamped(0.1 )).toBe(0.1 ) });
-    test('0.5 => 0.5'  ,() => { expect(Activation.Clamped(0.5 )).toBe(0.5) });
-    test('1    => 1'   ,() => { expect(Activation.Clamped(1   )).toBe(1   ) });
-    test('999  => 1'   ,() => { expect(Activation.Clamped(999 )).toBe(1 ) });
+    test('Linear',() => { 
+        let output = Input.map(i => Activation.Linear(i));
+        expect(output).toEqual(Input);
+    });
+
+    test('Clamped',() => { 
+        let expected = [-1,-1,-1,-1,-0.5,-0.1,0,0.1,0.5,1,1,1,1]
+        let output = Input.map(i => Activation.Clamped(i));
+        expect(output).toEqual(expected);
+    });
+    
 
 })

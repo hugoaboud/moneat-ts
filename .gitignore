@@ -1,6 +1,6 @@
 build
 node_modules
 yarn.lock
-compiled/*
+compiled
 yarn-error.log
 benchmark/BigFiles

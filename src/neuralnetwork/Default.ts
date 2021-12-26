@@ -77,17 +77,17 @@ import Log, { LogLevel } from "../util/Log"
     protected BuildStepLayer(layer: GraphNode[]) {
         for (let n = 0; n < layer.length; n++) {
             let node = layer[n].gene;
-            let conns = layer[n].conns;
+            let inputs = layer[n].inputs;
             
-            let step = this.BuildStep(node, conns);
+            let step = this.BuildStep(node, inputs);
             this.steps.push(step);
         }
     }
-    protected BuildStep(node: NodeGene, conns: ConnectionGene[]) {
-        let step = [conns.length];
-        for (let i = 0; i < conns.length; i++) {
-            step.push(conns[i].in_node.id);
-            step.push(conns[i].weight.value);
+    protected BuildStep(node: NodeGene, inputs: ConnectionGene[]) {
+        let step = [inputs.length];
+        for (let i = 0; i < inputs.length; i++) {
+            step.push(inputs[i].in_node.id);
+            step.push(inputs[i].weight.value);
         }
         step.push(node.mult.value);
         step.push(node.bias.value);

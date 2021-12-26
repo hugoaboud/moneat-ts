@@ -37,7 +37,7 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
         },
         mutation: {
             add_node: 0.2,
-            delete_node: 0.2,
+            remove_node: 0.2,
             add_connection: 0.5,
             remove_connection: 0.5
         },

@@ -13,7 +13,7 @@ interface NN_Walker_Connection extends ConnectionGene {
 }
 interface NN_Walker_GraphNode extends GraphNode {
     gene: NN_Walker_Node
-    conns: NN_Walker_Connection[]
+    inputs: NN_Walker_Connection[]
 }
 
 /**
@@ -44,7 +44,7 @@ export class NN_Walker extends NeuralNetwork {
         }
         if (Log.Level === LogLevel.DEBUG) {
             Log.Data(this,'input',input, LogLevel.DEBUG);
-            Log.Data(this,'inputs',inputs.map(i => ({node: i.gene.id, value: i.gene.value, conns: i.conns.map(ii => ii.in_node.id)})), LogLevel.DEBUG);
+            Log.Data(this,'inputs',inputs.map(i => ({node: i.gene.id, value: i.gene.value, conns: i.inputs.map(ii => ii.in_node.id)})), LogLevel.DEBUG);
         }
 
         // Hidden+Output
@@ -54,7 +54,7 @@ export class NN_Walker extends NeuralNetwork {
 
             for (let n = 0; n < step.length; n++) {
                 let node = step[n].gene;
-                let conns = step[n].conns;
+                let conns = step[n].inputs;
                 let sum = 0;
                 for (let i = 0; i < conns.length; i++) {
                     sum += (conns[i].in_node.value || 0) * conns[i].weight.value;
@@ -65,7 +65,7 @@ export class NN_Walker extends NeuralNetwork {
             if (!step.length) break;
 
             if (Log.Level === LogLevel.DEBUG)
-                Log.Data(this,'step',step.map(i => ({node: i.gene.id, value: i.gene.value, conns: i.conns.map(ii => ii.in_node.id)})), LogLevel.DEBUG);
+                Log.Data(this,'step',step.map(i => ({node: i.gene.id, value: i.gene.value, conns: i.inputs.map(ii => ii.in_node.id)})), LogLevel.DEBUG);
         }
 
         // Log output on DEBUG level

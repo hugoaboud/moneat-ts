@@ -79,7 +79,6 @@ export default class Tournament extends Evolution {
         Log.Method(this, 'SpeciesEpoch', `(population:${species.population.length},offspring:${offspring})`, LogLevel.INFO);
 
         let population = species.population;
-        let n = population.length;
 
         population = this.Sort(population);
         population = this.Death(population);

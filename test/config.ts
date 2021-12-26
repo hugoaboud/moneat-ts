@@ -1,9 +1,9 @@
 import { Activation } from "../src/Activation";
 import { IGenomeConfig, IMutableParamConfig } from "../src/Genome";
-import { DefaultMutableParamConfig } from "../src/util/Defaults";
+import { DefaultGenomeConfig, DefaultMutableParamConfig } from "../src/util/Defaults";
 import { DeepPartial, Merge } from "../src/util/Config";
 
-export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge({
+export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGenomeConfig({
     
     inputs: 3,
     outputs: 3,
@@ -19,8 +19,6 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge({
     
     recurrent: true
     
-}, config);
+}), config);
 
-export const MutableParam = (config?: DeepPartial<IMutableParamConfig>) => Merge({
-    ...DefaultMutableParamConfig()
-}, config);
+export const MutableParam = (config?: DeepPartial<IMutableParamConfig>) => Merge(DefaultMutableParamConfig(), config);

@@ -51,7 +51,7 @@ import { NeuralNetwork } from "../../src/NeuralNetwork"
 
             for (let n = 0; n < layer.length; n++) {
                 let node = layer[n].gene;
-                let conns = layer[n].conns;
+                let conns = layer[n].inputs;
                 
                 file += `\tn${node.id} = ${node.activation.name}((`;
                 for (let i = 0; i < conns.length; i++) {

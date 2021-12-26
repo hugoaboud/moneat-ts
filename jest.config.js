@@ -1,4 +1,4 @@
-const { Header } = require('./build/src/cli/string');
+const { Header } = require('./build/src/cli/String');
 console.log(Header('TEST'));
 
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */

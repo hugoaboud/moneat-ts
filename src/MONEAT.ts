@@ -172,7 +172,7 @@ export default class MONEAT {
         Log.Method(this, 'Evolve', `(epochs:${epochs})`, LogLevel.INFO);
 
         // Run epochs
-        let evolution = new (this.config.evolution.class as any)(this.config.evolution, this.config.genome)
+        let evolution = new (this.config.evolution.class as any)(this.config)
         for (let e = 0; e < epochs; e++) {
             
             // Reset networks and fitnesses
@@ -190,7 +190,7 @@ export default class MONEAT {
             if (e == epochs-1) break;
 
             // Evolution epoch
-            this.population = evolution.Epoch(this.population);
+            this.population = evolution.Epoch(this);
             this.Speciate();
         }
 

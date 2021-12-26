@@ -45,7 +45,7 @@ import Log, { LogLevel } from "../../src/util/Log"
 
             for (let n = 0; n < layer.length; n++) {
                 let node = layer[n].gene;
-                let conns = layer[n].conns;
+                let conns = layer[n].inputs;
                 
                 let step = [conns.length];
                 for (let i = 0; i < conns.length; i++) {

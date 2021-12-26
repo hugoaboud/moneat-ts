@@ -1,5 +1,6 @@
 import { Colored } from "../cli/String";
 import { Genome } from "../Genome";
+import { Exception } from "./Exception";
 
 export enum LogLevel {
     ERROR,
@@ -42,6 +43,17 @@ export default class Log {
             Colored(origin, 'lightcyan') + '.' +
             Colored(alias, 'lightgreen') + ': ' +
             inout
+        )
+    
+    }
+    
+    static Exception(e: Exception, level: LogLevel) {
+        if (level > this.Level) return;
+                
+        console.log(
+            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(e.name, 'lightcyan') + '.' +
+            e.message
         )
     
     }

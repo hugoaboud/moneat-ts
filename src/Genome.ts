@@ -40,7 +40,7 @@ export interface IGenomeConfig {
 
     mutation: {
         add_node: number
-        delete_node: number
+        remove_node: number
         add_connection: number
         remove_connection: number
     }
@@ -102,6 +102,12 @@ export class MutableParam {
         }
     }
 
+    Clone() {
+        let clone = new MutableParam(this.config);
+        clone.value = this.value;
+        return clone;
+    }
+
 }
 
 /**
@@ -142,6 +148,8 @@ export class Genome {
     ) {
         if (config.inputs <= 0) throw GenomeException.ZeroInputNodes();
         if (config.outputs <= 0) throw GenomeException.ZeroOutputNodes();
+        if (config.activation.hidden.length == 0) throw GenomeException.EmptyHiddenActivations();
+        if (config.activation.output.length == 0) throw GenomeException.EmptyOutputActivations();
 
         this.id = StringID();
         Log.Method(this, 'new', `(ins:${config.inputs},outs:${config.outputs})`, LogLevel.DEBUG);
@@ -169,7 +177,7 @@ export class Genome {
 
     /* Historical Gene Matching */
 
-    InnovationRanges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
+    static InnovationRanges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
         let a_range = [Infinity,-Infinity] as [number,number];
         for (let i = 0; i < a.length; i++) {
             let inn = a[i].innovation;
@@ -197,7 +205,7 @@ export class Genome {
             b: peer.getConns()
         }
         
-        let ranges = this.InnovationRanges(conns.a, conns.b);
+        let ranges = Genome.InnovationRanges(conns.a, conns.b);
         let b_matches = [];
 
         for (let i = 0; i < conns.a.length; i++) {
@@ -210,11 +218,12 @@ export class Genome {
                 b_matches.push(cb_i);
                 let m = (ca.enabled?[ca]:[]).concat(cb.enabled?[cb]:[]);
                 matching.push(m);
+                continue;
             }
 
             // Disjoint / Excess
             if (!ca.enabled) continue;
-            if (ca.innovation < ranges.a[0] || ca.innovation > ranges.a[1]) disjoint.push(ca);
+            if (ca.innovation < ranges.b[0] || ca.innovation > ranges.b[1]) disjoint.push(ca);
             else excess.push(ca);
         }
 
@@ -233,7 +242,7 @@ export class Genome {
         }
     }
 
-    /* Mutation */
+    /* Random */
 
     RandomNodePair() {
         let nodes = this.getNodes();
@@ -261,7 +270,9 @@ export class Genome {
         return conns[Math.floor(Math.random() * conns.length)];
     }
 
-    MutateAddConnection(in_node: NodeGene, out_node: NodeGene) {
+    /* Mutation */
+
+    AddConnection(in_node: NodeGene, out_node: NodeGene) {
         if (in_node.type === 'output') throw GenomeException.CantConnectFromOutput();
         if (out_node.type === 'input') throw GenomeException.CantConnectToInput();
         this.conns.map(conn => {
@@ -269,7 +280,7 @@ export class Genome {
                 throw GenomeException.DuplicateConnection();
         })
         let innovation = Innovation.new;
-        Log.Method(this,'MutateAddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.DEBUG);
+        Log.Method(this,'AddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.DEBUG);
 
         this.conns.push({ 
             in_node: in_node,
@@ -280,16 +291,17 @@ export class Genome {
         })
     }
 
-    MutateRemoveConnection(connection: ConnectionGene) {
-        
+    RemoveConnection(conn: ConnectionGene) {
+        Log.Method(this,'RemoveConnection',`(conn:${conn.innovation})`, LogLevel.DEBUG);
+        this.conns.splice(this.conns.indexOf(conn),1);
     }
     
-    MutateAddNode(conn: ConnectionGene) {
+    AddNode(conn: ConnectionGene) {
         if (!conn.enabled) throw GenomeException.CantAddToDisabledConnection();
         
         let innovation_a = Innovation.new;
         let innovation_b = Innovation.new
-        Log.Method(this,'MutateAddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
+        Log.Method(this,'AddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
 
         conn.enabled = false;
 
@@ -318,20 +330,55 @@ export class Genome {
 
     }
     
-    MutateRemoveNode(node: NodeGene) {
+    RemoveNode(node: NodeGene) {
+        Log.Method(this,'RemoveNode',`(node:${node.id})`, LogLevel.DEBUG);
+        let n = this.nodes.indexOf(node);
+        if (n < this.config.inputs) throw GenomeException.CantRemoveInputNode();
+        if (n < this.config.inputs+this.config.outputs) throw GenomeException.CantRemoveOutputNode();
 
+        this.nodes.splice(n,1);
+        this.conns = this.conns.filter(conn =>
+            conn.in_node != node && conn.out_node != node )
     }
 
     Mutate() {
-
+        Log.Method(this,'Mutate',`()`, LogLevel.DEBUG);
+        try {
+            if (Math.random() < this.config.mutation.add_connection) {
+                let pair = this.RandomNodePair();
+                this.AddConnection(pair[0], pair[1]);
+            }
+            else if (Math.random() < this.config.mutation.remove_connection) {
+                this.RemoveConnection(this.conns[Math.floor(Math.random()*this.conns.length)]);
+            }
+            else if (Math.random() < this.config.mutation.add_node) {
+                this.AddNode(this.RandomEnabledConnection());
+            }
+            else if (Math.random() < this.config.mutation.remove_node) {
+                this.RemoveNode(this.nodes[Math.floor(Math.random()*this.nodes.length)]);
+            }
+        }
+        catch (e) { Log.Exception(e as any, LogLevel.DEBUG) + ' (ignored)' }
     }
 
     /* Crossover */
     
     Clone(): Genome {
         let clone = new Genome(this.config);
-        clone.nodes = this.nodes.slice();
-        clone.conns = this.conns.slice();
+        clone.nodes = this.nodes.map((node,id) => ({
+            id,
+            type: node.type,
+            activation: node.activation,
+            bias: node.bias?.Clone(),
+            mult: node.mult?.Clone()
+        }));
+        clone.conns = this.conns.map((conn,id) => ({
+            in_node: clone.nodes[this.nodes.indexOf(conn.in_node)],
+            out_node: clone.nodes[this.nodes.indexOf(conn.out_node)],
+            enabled: conn.enabled,
+            weight: conn.weight.Clone(),
+            innovation: conn.innovation
+        }));
         return clone;
     }
 
@@ -368,10 +415,16 @@ class GenomeException extends Exception {
     static code = 'E_GENOME'
 
     static ZeroInputNodes() {
-        return new this('Number of input nodes should be greater than 0', this.code);
+        return new this('(config) Number of input nodes should be greater than 0', this.code);
     }
     static ZeroOutputNodes() {
-        return new this('Number of output nodes should be greater than 0', this.code);
+        return new this('(config) Number of output nodes should be greater than 0', this.code);
+    }
+    static EmptyHiddenActivations() {
+        return new this('(config) You should define at least one hidden activation function', this.code);
+    }
+    static EmptyOutputActivations() {
+        return new this('(config) You should define at least one output activation function', this.code);
     }
     static CantConnectFromOutput() {
         return new this('Connection can\'t be created from an output node', this.code);
@@ -384,6 +437,12 @@ class GenomeException extends Exception {
     }
     static CantAddToDisabledConnection() {
         return new this('Can\'t add a node to a disabled connection', this.code);
+    }
+    static CantRemoveInputNode() {
+        return new this('Can\'t remove an input node', this.code);
+    }
+    static CantRemoveOutputNode() {
+        return new this('Can\'t remove an output node', this.code);
     }
 
 }
