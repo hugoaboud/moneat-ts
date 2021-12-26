@@ -1,7 +1,8 @@
 import { Activation } from "../src/Activation";
 import { IGenomeConfig, IMutableParamConfig } from "../src/Genome";
-import { DefaultGenomeConfig, DefaultMutableParamConfig } from "../src/util/Defaults";
+import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultMutableParamConfig } from "../src/util/Defaults";
 import { DeepPartial, Merge } from "../src/util/Config";
+import { IMONEATConfig } from "../src/MONEAT";
 
 export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGenomeConfig({
     
@@ -22,3 +23,7 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGeno
 }), config);
 
 export const MutableParam = (config?: DeepPartial<IMutableParamConfig>) => Merge(DefaultMutableParamConfig(), config);
+
+export const MONEAT = (config?: DeepPartial<IMONEATConfig>) => Merge(DefaultMONEATConfig({
+
+}), config);

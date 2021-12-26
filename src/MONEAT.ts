@@ -2,6 +2,7 @@ import Evolution, { IEvolutionConfig } from "./Evolution";
 import {FitnessMethod} from "./Fitness";
 import { ConnectionGene, Genome, IGenomeConfig, Innovation } from "./Genome"
 import { NeuralNetwork } from "./NeuralNetwork";
+import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
 
 /**
@@ -63,6 +64,7 @@ export default class MONEAT {
     constructor(
         protected config: IMONEATConfig
     ) {
+        if (this.config.population <= 0) throw MONEATException.InvalidPopulationSizse();
         this.Reset();
     }
 
@@ -90,6 +92,9 @@ export default class MONEAT {
 
     CompatibilityDistance(a: Genome, b: Genome) {
         let match = a.MatchGenes(b);
+        
+        let N = match.larger;
+        if (N == 0) return 0;
 
         let E = match.excess.length;
         let D = match.disjoint.length;
@@ -105,7 +110,10 @@ export default class MONEAT {
         let c1 = this.config.species.compatibility.excess_coeff;
         let c2 = this.config.species.compatibility.disjoint_coeff;
         let c3 = this.config.species.compatibility.weights_coeff;
-        let N = match.larger;
+
+        console.log({
+            E, D, W, N, c1, c2, c3, result: (c1*E)/N + (c2*D)/N + c3*W
+        });
 
         return (c1*E)/N + (c2*D)/N + c3*W;
     }
@@ -209,4 +217,17 @@ export default class MONEAT {
     getPopulation() { return this.population }
     getSpecies() { return this.species }
 
+}
+
+/**
+ * MONEAT Exceptions
+ */
+class MONEATException extends Exception {
+    
+    static code = 'E_MONEAT'
+
+    static InvalidPopulationSizse() {
+        return new this('(config) Population size should be greater than 0', this.code);
+    }
+    
 }

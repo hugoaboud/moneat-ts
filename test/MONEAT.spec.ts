@@ -1,34 +1,62 @@
 import { Genome } from "../src/Genome";
-import { Genome as GenomeConfig } from "./config";
+import MONEAT from "../src/MONEAT";
+import * as Config from "./config";
 
 describe('Constructor', () => {
 
-    test.skip('Should fail for population <= 0', async () => {
-        
+    test('Should fail for population <= 0', async () => {
+        expect(() => {
+            new MONEAT(Config.MONEAT({
+                population: 0
+            }))
+        }).toThrow('E_MONEAT: (config) Population size should be greater than 0')
     });
-
-    test.skip('Should fail for empty fitness methods list', async () => {
-        
-    });   
 
 })
 
 describe('Reset', () => {
 
-    test.skip('Should create population of genomes with configured size', async () => {
-        
+    test('Should create population of genomes with configured size', async () => {
+        let moneat = new MONEAT(Config.MONEAT({
+            population: 42
+        }));
+        expect(moneat.getPopulation()).toHaveLength(42);
     });
 
-    test.skip('Should create network and reset fitness for individual', async () => {
-        
+    test('Should create network and reset fitness for individual', async () => {
+        let moneat = new MONEAT(Config.MONEAT({
+            population: 42
+        }));
+        moneat.getPopulation().map(ind => {
+            expect(ind.network).toBeNull();
+            moneat.ResetNetworkAndFitness(ind);
+            expect(ind.network).not.toBeNull();
+            expect(ind.fitness).toHaveLength(0);
+        })
     });
 
 })
 
 describe('Compatibility Distance', () => {
 
-    test.skip('Should be 0 for clone', async () => {
-        
+    test('Should be 0 for empty genomes', async () => {
+        let moneat = new MONEAT(Config.MONEAT({
+            population: 2
+        }))
+        let a = moneat.getPopulation()[0].genome;
+        let b = moneat.getPopulation()[1].genome;
+        let dist = moneat.CompatibilityDistance(a, b);
+        expect(dist).toEqual(0);
+    });
+
+    test('Should be 0 for clone', async () => {
+        let moneat = new MONEAT(Config.MONEAT({
+            population: 1
+        }))
+        let genome = moneat.getPopulation()[0].genome;
+        let clone = genome.Clone();
+        let dist = moneat.CompatibilityDistance(genome, clone);
+        expect(dist).toEqual(0);
     });
 
     test.skip('Should take excess nodes into account', async () => {
