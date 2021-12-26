@@ -25,6 +25,46 @@ describe('Reset', () => {
 
 })
 
+describe('Compatibility Distance', () => {
+
+    test.skip('Should be 0 for clone', async () => {
+        
+    });
+
+    test.skip('Should take excess nodes into account', async () => {
+        
+    });
+
+    test.skip('Should take excess coefficient into account', async () => {
+        
+    });
+
+    test.skip('Should take excess into account', async () => {
+        
+    });
+
+    test.skip('Should take disjoint coefficient into account', async () => {
+        
+    });
+
+    test.skip('Should take total weight difference into account', async () => {
+        
+    });
+
+    test.skip('Weight of disabled gene should be 0 on difference calculation', async () => {
+        
+    });
+
+    test.skip('Should take weight coefficient into account', async () => {
+        
+    });
+
+})
+
+describe('Speciate', () => {
+
+})
+
 describe('Evolve', () => {
 
     test.skip('Should calculate single fitness for each individual', async () => {

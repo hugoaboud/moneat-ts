@@ -104,6 +104,14 @@ describe('MutateAddConnection', () => {
 
 })
 
+describe('MutateRemoveConnection', () => {
+
+    test.skip('Should remove connection gene from genome', async () => {
+        
+    });
+
+});
+
 describe('MutateAddNode', () => {
 
     test('Should fail for disabled connection', async () => {
@@ -163,6 +171,46 @@ describe('MutateAddNode', () => {
     });
 
 })
+
+describe('MutateRemoveNode', () => {
+
+    test.skip('Should remove node gene from genome', async () => {
+        
+    });
+
+    test.skip('Should remove all connections from node', async () => {
+        
+    });
+
+    test.skip('Should remove all connections to node', async () => {
+        
+    });
+
+});
+
+describe('MatchGenes', () => {
+
+    test.skip('Should get innovation ranges for both lists', async () => {
+        
+    });
+
+    test.skip('Should return matching genes of both genomes', async () => {
+        
+    });
+
+    test.skip('Should return disjoint genes of both genomes', async () => {
+        
+    });
+
+    test.skip('Should return excess genes of both genomes', async () => {
+        
+    });
+
+    test.skip('Should ignore disabled genomes', async () => {
+        
+    });
+
+});
 
 describe('Clone', () => {
 

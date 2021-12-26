@@ -1,75 +1,60 @@
-import { Activation } from "./src/Activation";
-import { Header } from "./src/cli/String";
-import { Genome } from "./src/Genome";
-import { DNeuralNetwork } from "./src/neuralnetwork/Default";
-import { DNeuralNetworkCompiler } from "./src/neuralnetwork/DefaultCompiler";
-import { TrackTime } from "./src/util/Benchmark";
-import Log, { LogLevel } from "./src/util/Log";
-import { Genome as GenomeConfig } from "./test/config";
+import { Colored, Header, Question, Quote } from "./src/cli/String";
+
+
 
 console.log(Header("Command Line Interface"));
 
-const INPUTS = 32;
-const OUTPUTS = 32;
-const MUTATIONS = 1024;
-const STEPS = 10000;
+console.log(Quote("Welcome to MONEAT!\n"+
+            "This is a free and open-source project I've created to study  the interaction between NEAT and other AI strategies.\n"+
+            "You are free to use it for any purpose, but please keep two   things in mind:\n"+
+            "  - Being ethical is an active process. Study and discuss,    don't relay on inate ethics.\n"+
+            "  - If this tools helps you achieve a financial goal, considerdonating."))
 
-const Input = Array.from({length: 100000}, () => Array.from({length: INPUTS}, () => Math.random()));
-
-/* Genome Build */
-
-function MutateAddConnection(genome: Genome, tries = 3) {
-    for (let i = 0; i < tries; i++) {
-        try {
-            let pair = genome.RandomNodePair()
-            genome.MutateAddConnection(pair[0], pair[1]);
-            return;
-        } catch {}
-    }
+interface PageOption {
+    name: string,
+    callback: () => Promise<void>
 }
-function NewGenome(): Genome {
-    let genome = new Genome(GenomeConfig({
-        inputs: INPUTS,
-        outputs: OUTPUTS,
-        activation: {   
-            hidden: [Activation.Clamped],
-            output: [Activation.Clamped]
+
+async function Page(options: Record<string,PageOption>, color: string, main = false) {
+    while (true) {
+
+        Object.keys(options).map(o => {
+            console.log(Colored(`[${o}] ${options[o].name}`, color));
+        })
+        if (main) console.log(Colored(`[q] Quit`, color));
+        else console.log(Colored(`[<] Back`, color));
+        
+        console.log()
+        let option = await Question('Choose an option:');
+        if ((main && option === 'q') || (!main && option === '<')) return;
+
+        if (!options[option]) {
+            console.log(Colored('Invalid option.\n', 'red'));
+            continue;
         }
-    }));
-    for (let i = 0; i < MUTATIONS; i++) {
-        MutateAddConnection(genome);
-        genome.MutateAddNode(genome.RandomEnabledConnection());
-        MutateAddConnection(genome);
+        
+        await options[option].callback();
     }
-    return genome;
 }
 
+async function Main() {
+    return Page({
+        'e': {
+            name: 'Examples',
+            callback: async () => Examples()
+        }
+    }, 'lightgreen', true)
+}
 
-Log.Level = LogLevel.ERROR;
+async function Examples() {
+    return Page({
+        '1': {
+            name: 'XOR',
+            callback: async () => {
+                require('./examples/xor/xor')
+            }
+        }
+    }, 'lightblue')
+}
 
-let genome = NewGenome();
-console.log(genome.getID());
-//Log.Genome(genome);	
-
-let defaul = {
-    nn: new DNeuralNetwork(genome),
-    out: [] as number[]
-};
-
-let compiled_path = __dirname+'/../'+DNeuralNetworkCompiler(genome);
-delete require.cache[compiled_path];
-
-let compiled = {
-    nn: require(compiled_path),
-    out: [] as number[]
-};
-
-TrackTime('Default', (i) => {
-    defaul.out = defaul.nn.Run(Input[i]);
-}, STEPS);
-console.log(defaul.out);
-
-TrackTime('Compiled', (i) => {
-    compiled.out = compiled.nn(Input[i]);
-}, STEPS);
-console.log(compiled.out);
+Main();

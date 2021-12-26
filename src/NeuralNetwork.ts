@@ -17,7 +17,6 @@ export abstract class NeuralNetwork {
         this.id = this.graph.genome.getID();
         this.inputs = this.graph.genome.getInputCount();
         this.outputs = this.graph.genome.getOutputCount();
-        this.Reset();
     }
 
     Run(input: number[]): number[] {

@@ -13,6 +13,8 @@
 
     "test": "yarn build && node --trace-warnings node_modules/.bin/jest --runInBand --no-cache --verbose --silent",
 
+    "example:xor": "yarn build && node build/examples/xor/xor",
+
     "benchmark:iter": "yarn build && node build/benchmark/IterationBenchmark",
     "benchmark:declaration": "yarn build && node build/benchmark/DeclarationBenchmark",
     "benchmark:multivalues": "yarn build && node build/benchmark/MultiValuesBenchmark",

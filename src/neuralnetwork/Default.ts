@@ -37,7 +37,7 @@ import Log, { LogLevel } from "../util/Log"
      */
     Reset() {
         for (let i = 0; i < this.nodes.length; i++)
-            this.nodes[i] = Math.random()*2-1;
+            this.nodes[i] = 0;
     }
 
     

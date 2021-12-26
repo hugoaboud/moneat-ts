@@ -15,7 +15,7 @@ const LogColor = {
 
 export default class Log {
     
-    static Level = LogLevel.DEBUG
+    static Level = LogLevel.INFO
 
     static Data(domain: object, alias: string, data: any, level: LogLevel) {
         if (level > this.Level) return;

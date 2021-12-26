@@ -1,4 +1,5 @@
 import { ActivationFunction, RandomActivation } from "./Activation";
+import { Aggregation } from "./MONEAT";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
 import { Gaussian, StringID } from "./util/Random";
@@ -25,8 +26,8 @@ import { Gaussian, StringID } from "./util/Random";
 
 export interface IGenomeConfig {
 
-    inputs: number,
-    outputs: number,
+    inputs: number
+    outputs: number
 
     bias: IMutableParamConfig
     weight: IMutableParamConfig
@@ -35,6 +36,21 @@ export interface IGenomeConfig {
     activation: {
         hidden: ActivationFunction[]
         output: ActivationFunction[]
+    }
+
+    mutation: {
+        add_node: number
+        delete_node: number
+        add_connection: number
+        remove_connection: number
+    }
+
+    aggregation: {
+        default: Aggregation
+        mutation: {
+            prob: number
+            options: Aggregation[]
+        }
     }
     
     recurrent: boolean
@@ -51,6 +67,12 @@ export class Innovation {
     private static _last = 0;
     static get new() { return ++this._last; }
     static get last() { return this._last; }
+}
+export interface Match {
+    matching: ConnectionGene[][]
+    disjoint: ConnectionGene[]
+    excess: ConnectionGene[]
+    larger: number
 }
 
 /**
@@ -122,7 +144,7 @@ export class Genome {
         if (config.outputs <= 0) throw GenomeException.ZeroOutputNodes();
 
         this.id = StringID();
-        Log.Method(this, 'new', `(ins:${config.inputs},outs:${config.outputs})`, LogLevel.INFO);
+        Log.Method(this, 'new', `(ins:${config.inputs},outs:${config.outputs})`, LogLevel.DEBUG);
 
         for (let i = 0; i < config.inputs; i++) {
             this.nodes.push({
@@ -142,6 +164,72 @@ export class Genome {
                 bias: new MutableParam(config.bias),
                 mult: new MutableParam(config.mult)
             })
+        }
+    }
+
+    /* Historical Gene Matching */
+
+    InnovationRanges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
+        let a_range = [Infinity,-Infinity] as [number,number];
+        for (let i = 0; i < a.length; i++) {
+            let inn = a[i].innovation;
+            if (inn < a_range[0]) a_range[0] = inn;
+            if (inn > a_range[1]) a_range[1] = inn;
+        }
+        let b_range = [Infinity,-Infinity] as [number,number];
+        for (let i = 0; i < b.length; i++) {
+            let inn = b[i].innovation;
+            if (inn < b_range[0]) b_range[0] = inn;
+            if (inn > b_range[1]) b_range[1] = inn;
+        }
+        return {
+            a: a_range,
+            b: b_range
+        }
+    }
+
+    MatchGenes(peer: Genome): Match {
+        let matching = [] as ConnectionGene[][];
+        let disjoint = [] as ConnectionGene[];
+        let excess = [] as ConnectionGene[];
+        let conns = {
+            a: this.conns,
+            b: peer.getConns()
+        }
+        
+        let ranges = this.InnovationRanges(conns.a, conns.b);
+        let b_matches = [];
+
+        for (let i = 0; i < conns.a.length; i++) {
+            let ca = conns.a[i];
+
+            // Matching
+            let cb_i = conns.b.findIndex(c => c.innovation == ca.innovation);
+            if (cb_i >= 0) {
+                let cb = conns.b[cb_i];
+                b_matches.push(cb_i);
+                let m = (ca.enabled?[ca]:[]).concat(cb.enabled?[cb]:[]);
+                matching.push(m);
+            }
+
+            // Disjoint / Excess
+            if (!ca.enabled) continue;
+            if (ca.innovation < ranges.a[0] || ca.innovation > ranges.a[1]) disjoint.push(ca);
+            else excess.push(ca);
+        }
+
+        for (let i = 0; i < conns.b.length; i++) {
+            let cb = conns.b[i];
+            if (!cb.enabled) continue;
+            if (cb.innovation < ranges.a[0] || cb.innovation > ranges.a[1]) disjoint.push(cb);
+            else if (!b_matches.includes(i)) excess.push(cb);
+        }
+
+        return {
+            matching,
+            disjoint,
+            excess,
+            larger: Math.max(conns.a.length, conns.b.length)
         }
     }
 
@@ -181,7 +269,7 @@ export class Genome {
                 throw GenomeException.DuplicateConnection();
         })
         let innovation = Innovation.new;
-        Log.Method(this,'MutateAddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.INFO);
+        Log.Method(this,'MutateAddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.DEBUG);
 
         this.conns.push({ 
             in_node: in_node,
@@ -191,13 +279,17 @@ export class Genome {
             innovation
         })
     }
+
+    MutateRemoveConnection(connection: ConnectionGene) {
+        
+    }
     
     MutateAddNode(conn: ConnectionGene) {
         if (!conn.enabled) throw GenomeException.CantAddToDisabledConnection();
         
         let innovation_a = Innovation.new;
         let innovation_b = Innovation.new
-        Log.Method(this,'MutateAddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.INFO);
+        Log.Method(this,'MutateAddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
 
         conn.enabled = false;
 
@@ -224,7 +316,11 @@ export class Genome {
             innovation: innovation_b
         })
 
-    }   
+    }
+    
+    MutateRemoveNode(node: NodeGene) {
+
+    }
 
     Mutate() {
 

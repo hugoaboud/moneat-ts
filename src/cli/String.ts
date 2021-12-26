@@ -1,3 +1,5 @@
+import * as readline from 'readline';
+
 /**
  * Returns colored string
  */ 
@@ -37,4 +39,41 @@ export function Header(title?: string): string {
     (title?(
         Colored(`#  ${title}  #\n`, 'lightpurple')
     ):'')
+}
+/*
+ * Returns colored quote
+ */
+export function Quote(quote: string): string {
+
+    let lines = quote.split('\n');
+    let pad = (str:string) => (str+'                                                              ').slice(0,62);
+
+    let str = '';
+    lines.map(line => {
+        while (line.length > 0) {
+            let l = line.slice(0,62);
+            str += Colored('| ' + pad(l) + ' |', 'lightgray') + '\n';
+            line = line.slice(62);
+        }
+    })
+
+    return str;
+}
+
+/*
+ * Ask a question and wait for the answer
+ */
+export async function Question(text: string, defaul='', prefix=''): Promise<string> {
+    return new Promise(resolve => {
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        rl.question(Colored(text + ' ', 'cyan')+prefix, val => {
+            if (!val.length) return;
+            rl.close();
+            resolve(val);
+        })
+        rl.write(defaul);
+    })
 }
