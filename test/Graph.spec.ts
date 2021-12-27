@@ -59,7 +59,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = Object.values(genome.getNodes());
+            let nodes = genome.getNodes();
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -67,12 +67,12 @@ describe('Walk', () => {
             genome.AddNode(conns[1]); // 5
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,2))
+            expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,2))
             let layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(4,6))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(4,6))
             expect(layer.map(n => n.inputs)).toEqual([[conns[2]],[conns[4]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(2,4))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(2,4))
             expect(layer.map(n => n.inputs)).toEqual([[conns[3]],[conns[5]]])
         });
 
@@ -83,7 +83,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = Object.values(genome.getNodes());
+            let nodes = genome.getNodes();
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -92,12 +92,12 @@ describe('Walk', () => {
             conns[2].enabled = false;
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,2))
+            expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,2))
             let layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(5,6))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(5,6))
             expect(layer.map(n => n.inputs)).toEqual([[conns[4]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(3,4))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(3,4))
             expect(layer.map(n => n.inputs)).toEqual([[conns[5]]])
         });
 
@@ -108,7 +108,7 @@ describe('Walk', () => {
                 inputs: 1,
                 outputs: 1
             }));
-            let nodes = Object.values(genome.getNodes());
+            let nodes = genome.getNodes();
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[1]);
             genome.AddNode(conns[0]); // 2
@@ -117,15 +117,15 @@ describe('Walk', () => {
             genome.AddConnection(nodes[3], nodes[3]);
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,1))
+            expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,1))
             let layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(2,3))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(2,3))
             expect(layer.map(n => n.inputs)).toEqual([[conns[1],conns[5]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(3,4))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(3,4))
             expect(layer.map(n => n.inputs)).toEqual([[conns[3],conns[6]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(1,2))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(1,2))
             expect(layer.map(n => n.inputs)).toEqual([[conns[4]]])
         });
 
@@ -138,7 +138,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = Object.values(genome.getNodes());
+            let nodes = genome.getNodes();
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -149,15 +149,15 @@ describe('Walk', () => {
             genome.AddConnection(nodes[5], nodes[4]);
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,2))
+            expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,2))
             let layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(4,6))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(4,6))
             expect(layer.map(n => n.inputs)).toEqual([[conns[2],conns[9]],[conns[4],conns[8]]])
             layer = graph.Walk();
             expect(layer.map(n => n.gene)).toEqual([nodes[3],nodes[6]])
             expect(layer.map(n => n.inputs)).toEqual([[conns[5]],[conns[6]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(2,3))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(2,3))
             expect(layer.map(n => n.inputs)).toEqual([[conns[7]]])
         });
 
@@ -169,7 +169,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = Object.values(genome.getNodes());
+            let nodes = genome.getNodes();
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -179,12 +179,12 @@ describe('Walk', () => {
             genome.AddConnection(nodes[5], nodes[4]);
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,2))
+            expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,2))
             let layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(4,6))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(4,6))
             expect(layer.map(n => n.inputs)).toEqual([[conns[2],conns[7]],[conns[4],conns[6]]])
             layer = graph.Walk();
-            expect(layer.map(n => n.gene)).toEqual(nodes.slice(2,4))
+            expect(layer.map(n => n.gene)).toEqual(Object.values(nodes).slice(2,4))
             expect(layer.map(n => n.inputs)).toEqual([[conns[3]],[conns[5]]]) 
         });
     })

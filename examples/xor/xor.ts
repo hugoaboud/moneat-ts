@@ -61,9 +61,6 @@ let winner = population[0];
 
 Log.Genome(winner.genome);
 
-console.log(XOR(winner.network));
-console.log(winner.fitness);
-
 console.log('0 , 0 => ' + winner.network.Run([0,0], true));
 console.log('0 , 1 => ' + winner.network.Run([0,1], true));
 console.log('1 , 0 => ' + winner.network.Run([1,0], true));

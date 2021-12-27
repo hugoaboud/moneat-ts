@@ -56,7 +56,7 @@ describe('Constructor', () => {
 
     test('Should create input and output nodes', async () => {
         let genome = new Genome(Config());
-        let nodes = genome.getNodes();
+        let nodes = Object.values(genome.getNodes());
         expect(nodes).toHaveLength(6);
         for (let i = 0; i < 3; i++) {
             expect(nodes[i].type).toBe('input');
@@ -117,21 +117,6 @@ describe ('Historical Gene Matching', () => {
             let match = TMatch();
             let excess = match.excess.map(m => m.innovation);
             expect(excess).toEqual([2,4])
-        });
-    
-        test('Should ignore disabled genomes', async () => {
-            let a = TGenome([TGene(0),TGene(1),TGene(5),TGene(3)]);
-            let b = TGenome([TGene(3),TGene(2),TGene(4),TGene(1)]);
-            (a as any).conns[1].enabled = false;
-            (a as any).conns[2].enabled = false;
-            (b as any).conns[1].enabled = false;
-            let match = a.MatchGenes(b);
-            let matching = match.matching.map(m => m.map(ab => ab.innovation));
-            expect(matching).toEqual([[1],[3,3]])
-            let disjoint = match.disjoint.map(m => m.innovation);
-            expect(disjoint).toEqual([0])
-            let excess = match.excess.map(m => m.innovation);
-            expect(excess).toEqual([4])
         });
     
     });
@@ -290,44 +275,6 @@ describe('Mutation', () => {
             expect(conns.length).toBe(1);
         }); 
         
-        // 0 → 4(x) → 5(4) → 2
-        //          ↗  ↓        
-        // 1  →  →    6(5) → 3
-        test('Should update ids on nodes and connections to ensure id == indexOf', async () => {
-            let genome = new Genome(Config({
-                inputs: 2,
-                outputs: 2
-            }));
-            let nodes = genome.getNodes();
-            let conns = genome.getConns();
-            genome.AddConnection(nodes[0],nodes[2]);
-            genome.AddNode(conns[0]); // 4
-            genome.AddNode(conns[2]); // 5
-            genome.AddConnection(nodes[1],nodes[5]);
-            genome.AddConnection(nodes[5],nodes[3]);
-            genome.AddNode(conns[6]); // 6
-            let n5 = nodes[5];
-            let n6 = nodes[6];
-            let c3 = conns[3];
-            let c4 = conns[4];
-            let c6 = conns[6];
-            let c7 = conns[7];
-            let c8 = conns[8];
-            Log.Genome(genome);
-            genome.RemoveNode(nodes[4]);
-            Log.Genome(genome);
-            conns = genome.getConns();
-            expect(n5).toBe(nodes[4]);
-            expect(n5.id).toEqual(4);
-            expect(n6).toBe(nodes[5]);
-            expect(n6.id).toEqual(5);
-            expect(c3.out_node.id).toEqual(4);
-            expect(c4.in_node.id).toEqual(4);
-            expect(c6.in_node.id).toEqual(4);
-            expect(c7.in_node.id).toEqual(4);
-            expect(c7.out_node.id).toEqual(5);
-            expect(c8.in_node.id).toEqual(5);
-        }); 
     });
 })
 
