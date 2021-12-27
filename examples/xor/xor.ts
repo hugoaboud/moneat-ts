@@ -59,6 +59,8 @@ let population = MoNeat.Evolve(1000);
 
 let winner = population[0];
 
+Log.Genome(winner.genome);
+
 console.log(XOR(winner.network));
 console.log(winner.fitness);
 

@@ -66,8 +66,10 @@ export default class Tournament extends Evolution {
             this.stagnation++;
         else this.stagnation = 0;
 
-        if (this.stagnation > this.config.stagnation.max_epochs)
+        if (this.stagnation > this.config.stagnation.max_epochs) {
+            Log.Data(this, 'Stagnation', {fitness_sum: fitness_sum}, LogLevel.INFO);
             species = species.slice(0,this.config.stagnation.top_species)
+        }
 
         let o = this.OffspringBySpecies(species);
         let offspring = [] as Individual[];
@@ -111,7 +113,7 @@ export default class Tournament extends Evolution {
             let a = population[ra];
             let b = population[rb];
             newborns.push({
-                genome: a.genome.Crossover(b.genome),
+                genome: (a.shared_fitness[0] > b.shared_fitness[0])?a.genome.Crossover(b.genome):b.genome.Crossover(a.genome),
                 network: null as any,
                 fitness: [],
                 shared_fitness: []

@@ -75,7 +75,7 @@ export function DefaultMONEATConfig(config?: DeepPartial<IMONEATConfig>): IMONEA
                 excess_coeff: 1.0,
                 disjoint_coeff: 1.0,
                 weights_coeff: 0.5,
-                threshold: 1.0
+                threshold: 3.0
             }
         },
         network: DNeuralNetwork,

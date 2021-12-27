@@ -217,7 +217,7 @@ export class Genome {
                 let cb = conns.b[cb_i];
                 b_matches.push(cb_i);
                 if (!ca.enabled && !cb.enabled) continue;
-                let m = (ca.enabled?[ca]:[]).concat(cb.enabled?[cb]:[]);
+                let m = [ca,cb];
                 matching.push(m);
                 continue;
             }
@@ -345,6 +345,7 @@ export class Genome {
 
     Mutate() {
         Log.Method(this,'Mutate',`()`, LogLevel.DEBUG);
+        // Topology
         try {
             if (Math.random() < this.config.mutation.add_connection) {
                 let pair = this.RandomNodePair();
@@ -361,6 +362,15 @@ export class Genome {
             }
         }
         catch (e) { Log.Exception(e as any, LogLevel.DEBUG) + ' (ignored)' }
+        
+        // Mutable Params
+        this.nodes.map(node => {
+            node.bias?.Mutate();
+            node.mult?.Mutate();
+        })
+        this.conns.map(conn => {
+            conn.weight.Mutate();
+        })
     }
 
     /* Crossover */
@@ -385,14 +395,26 @@ export class Genome {
     }
 
     Crossover(peer: Genome): Genome {
-        // When crossing over, the
-        // genes in both genomes with the same innovation numbers are lined up. These genes
-        // are called matching genes. Genes that do not match are either disjoint or excess, depend-
-        // ing on whether they occur within or outside the range of the other parent’s innovation
-        // numbers. They represent structure that is not present in the other genome.  In com-
-        // posing the offspring/, genes are randomly chosen from either parent at matching genes,
-        // whereas all excess or disjoint genes are always included from the more fit parent.
-        return this.Clone();
+        // "In composing the offspring/, genes are randomly chosen from either parent at matching genes,
+        // whereas all excess or disjoint genes are always included from the more fit parent."
+        // In our case, "this" is always the more fit parent.
+
+        let clone = this.Clone();
+        
+        let match = this.MatchGenes(peer);    
+        match.matching.map(m => {
+            let i = this.conns.indexOf(m[0]);
+            let conn = m[Math.floor(Math.random()*2)];
+            clone.conns[i] = {
+                in_node: clone.nodes[this.nodes.indexOf(m[0].in_node)],
+                out_node: clone.nodes[this.nodes.indexOf(m[0].out_node)],
+                enabled: conn.enabled,
+                weight: conn.weight.Clone(),
+                innovation: conn.innovation
+            }
+        })
+
+        return clone;
     }
 
     /* Getters */

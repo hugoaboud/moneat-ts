@@ -107,7 +107,8 @@ export default class MONEAT {
         for (let i = 0; i < match.matching.length; i++) {
             let a = match.matching[i][0];
             let b = match.matching[i][1];
-            if (!b) W += a.weight.value;
+            if (!a.enabled) W += b.weight.value;
+            if (!b.enabled) W += a.weight.value;
             else W += Math.abs(a.weight.value-b.weight.value);
         }
 
@@ -218,6 +219,10 @@ export default class MONEAT {
         return this.Output();
 
     }
+
+    /**
+     * Crossover
+     */
 
     ReportFitness() {
         let best = Array(this.config.fitness.length).fill(-Infinity);
