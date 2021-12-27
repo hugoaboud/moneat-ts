@@ -1,5 +1,7 @@
 import { Activation } from "../src/Activation";
-import { ConnectionGene, Genome, Innovation } from "../src/Genome";
+import { ConnectionGene } from "../src/Gene";
+import { Genome } from "../src/Genome";
+import { Innovation } from "../src/Innovation";
 import Log from "../src/util/Log";
 import { Genome as Config } from "./config";
 
@@ -63,7 +65,7 @@ describe('Constructor', () => {
         }
         for (let i = 3; i < 6; i++) {
             expect(nodes[i].type).toBe('output');
-            expect(nodes[i].activation).toBe(Activation.Linear);
+            expect(nodes[i].actv).toBe(Activation.Linear);
         }
         let connections = genome.getConns();
         expect(connections).toHaveLength(0);
@@ -311,7 +313,7 @@ describe('Clone', () => {
             let clone_node = clone_nodes[genome_node.id];
             expect(clone_node.id).toEqual(genome_node.id);
             expect(clone_node.type).toEqual(genome_node.type);
-            expect(clone_node.activation).toBe(genome_node.activation);
+            expect(clone_node.actv).toBe(genome_node.actv);
             if (clone_node.bias) expect(clone_node.bias.value).toEqual(genome_node.bias.value);
             if (clone_node.mult) expect(clone_node.mult.value).toEqual(genome_node.mult.value);
         })

@@ -1,5 +1,6 @@
 import { ActivationFunction } from "../Activation"
-import { ConnectionGene, Genome, NodeGene } from "../Genome"
+import { ConnectionGene, NodeGene } from "../Gene"
+import { Genome } from "../Genome"
 import { GraphNode } from "../Graph"
 import { NeuralNetwork } from "../NeuralNetwork"
 import Log, { LogLevel } from "../util/Log"
@@ -74,7 +75,7 @@ import Log, { LogLevel } from "../util/Log"
         Object.values(nodes).map(node => {
             this.id_to_i[node.id] = this.nodes.length;
             this.nodes.push(0);
-            this.actvs.push(node.activation);
+            this.actvs.push(node.actv);
         })
     }
     protected BuildStepLayer(layer: GraphNode[]) {

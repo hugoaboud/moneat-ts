@@ -75,7 +75,7 @@ export default class Log {
                 Colored(`\t${(i+'  ').slice(0,3)} `, color) +
                 Colored(`\t${(node.id+'  ').slice(0,3)} `, color) +
                 Colored(`${(node.type + ' ').slice(0,6)} `, color) +
-                (node.activation?.name || ''+'        ').slice(0,19) + ' ' +
+                (node.actv?.name || ''+'        ').slice(0,19) + ' ' +
                 (node.bias?((Colored('b:','darkgray') + node.bias.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' ' +
                 (node.mult?((Colored('m:','darkgray') + node.mult.value.toFixed(3)+'      ').slice(0,19)):'        ') + ' '
             )

@@ -1,6 +1,7 @@
 import Evolution, { IEvolutionConfig } from "./Evolution";
 import {FitnessMethod} from "./Fitness";
-import { ConnectionGene, Genome, IGenomeConfig, Innovation } from "./Genome"
+import { Genome, IGenomeConfig } from "./Genome"
+import { Innovation } from "./Innovation";
 import { NeuralNetwork } from "./NeuralNetwork";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";

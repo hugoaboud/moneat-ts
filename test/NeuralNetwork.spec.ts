@@ -17,7 +17,7 @@ describe('Build', () => {
         genome.AddNode(conns[2]);
         let network = new DNeuralNetwork(genome);
         expect((network as any).nodes).toEqual([0,0,0,0,0,0,0,0,0]);
-        expect((network as any).actvs).toEqual([null,null,null,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear]);
+        expect((network as any).actvs).toEqual([undefined,undefined,undefined,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear,Activation.Linear]);
     });
 
     //  0 → 4 → 3

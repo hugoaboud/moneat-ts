@@ -1,6 +1,6 @@
 import { Activation } from "../src/Activation";
 import { Attribute } from "../src/Attribute";
-import { Genome, Innovation } from "../src/Genome";
+import { Genome } from "../src/Genome";
 import { DefaultAttributeConfig } from "../src/util/Defaults";
 import { Gaussian } from "../src/util/Random";
 import { Attribute as Config } from "./config";

@@ -1,4 +1,5 @@
-import { ConnectionGene, Genome, NodeGene } from "./Genome";
+import { ConnectionGene, NodeGene } from "./Gene";
+import { Genome } from "./Genome";
 
 export interface GraphNode {
     gene: NodeGene

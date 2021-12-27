@@ -21,7 +21,7 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
     let acts = {} as Record<string, string>;
     let id_to_i = {} as Record<number, number>;
     Object.values(nodes).map((node,i) => {
-        let act = node.activation;
+        let act = node.actv;
         if (!acts[act.name]) {
             acts[act.name] = act.toString().replace(/ {4}|\t/g,'').replace(/\n/g,' ');
         }
@@ -47,7 +47,7 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
             }
             cmd.push(node.mult.value);
             cmd.push(node.bias.value);
-            cmd.push(Object.keys(acts).indexOf(node.activation.name));
+            cmd.push(Object.keys(acts).indexOf(node.actv.name));
             cmd.push(id_to_i[node.id]);
             cmds.push(cmd);
         }
