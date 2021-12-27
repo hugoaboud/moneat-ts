@@ -6,12 +6,12 @@ import { Genome as Config } from "./config";
 
 describe('Innovation', () => {
     test('Global innovation number should start at 0', async () => {
-        expect(Innovation.last).toBe(0);
+        expect(Innovation.Last()).toBe(0);
     });
 
     test('Global innovation number should grow at each call', async () => {
-        expect(Innovation.new).toBe(1);
-        expect(Innovation.new).toBe(2);
+        expect(Innovation.New()).toBe(1);
+        expect(Innovation.New()).toBe(2);
     });
 
 })
@@ -96,7 +96,7 @@ describe ('Historical Gene Matching', () => {
         test('Should get innovation ranges for both lists', async () => {
             let a = [TGene(0),TGene(1),TGene(5),TGene(3)];
             let b = [TGene(3),TGene(2),TGene(4),TGene(1)];
-            let ranges = Genome.InnovationRanges(a,b);
+            let ranges = Innovation.Ranges(a,b);
             expect(ranges.a).toEqual([0,5])
             expect(ranges.b).toEqual([1,4])
         });
@@ -163,7 +163,7 @@ describe('Mutation', () => {
             let connections = genome.getConns();
             expect(connections.length).toBe(1);
             expect(connections[0].enabled).toBe(true);
-            expect(connections[0].innovation).toBe(Innovation.last);
+            expect(connections[0].innovation).toBe(Innovation.Last());
         });
     
     })

@@ -10,8 +10,6 @@ export interface ITournamentConfig extends IEvolutionConfig {
     elit: number,
     /** Death Rate: [0~1] Rate of population to kill at each epoch */
     death_rate: number,
-    /** Crossover Rate: [0~1] Rate of new individuals created from crossover. The rest of the population is filled with new random genomes  */
-    crossover_rate: number
 
     stagnation: {
         threshold: number

@@ -1,17 +1,18 @@
 import { Activation } from "../src/Activation";
-import { IGenomeConfig, IMutableParamConfig } from "../src/Genome";
-import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultMutableParamConfig } from "../src/util/Defaults";
+import { IGenomeConfig } from "../src/Genome";
+import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultAttributeConfig } from "../src/util/Defaults";
 import { DeepPartial, Merge } from "../src/util/Config";
 import { IMONEATConfig } from "../src/MONEAT";
+import { IAttributeConfig } from "../src/Attribute";
 
 export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGenomeConfig({
     
     inputs: 3,
     outputs: 3,
 
-    bias: DefaultMutableParamConfig(),
-    weight: DefaultMutableParamConfig(),
-    mult: DefaultMutableParamConfig(),
+    bias: DefaultAttributeConfig(),
+    weight: DefaultAttributeConfig(),
+    mult: DefaultAttributeConfig(),
     
     activation: {
         hidden: [Activation.Linear],
@@ -22,7 +23,7 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGeno
     
 }), config);
 
-export const MutableParam = (config?: DeepPartial<IMutableParamConfig>) => Merge(DefaultMutableParamConfig(), config);
+export const Attribute = (config?: DeepPartial<IAttributeConfig>) => Merge(DefaultAttributeConfig(), config);
 
 export const MONEAT = (config?: DeepPartial<IMONEATConfig>) => Merge(DefaultMONEATConfig({
 

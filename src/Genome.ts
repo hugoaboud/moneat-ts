@@ -1,37 +1,24 @@
 import { ActivationFunction, RandomActivation } from "./Activation";
+import { Attribute, IAttributeConfig } from "./Attribute";
 import { Aggregation } from "./MONEAT";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
-import { Gaussian, StringID } from "./util/Random";
+import { StringID } from "./util/Random";
 
 /**
  * Genome Configuration
  */
 
- export interface IMutableParamConfig {
-    min: number
-    max: number
-    init: {
-        mean: number
-        stdev: number
-    }
-    mutation: {
-        rate: number
-        prob: {
-            offset: number,
-            replace: number
-        }
-    }
-}
+
 
 export interface IGenomeConfig {
 
     inputs: number
     outputs: number
 
-    bias: IMutableParamConfig
-    weight: IMutableParamConfig
-    mult: IMutableParamConfig
+    bias: IAttributeConfig
+    weight: IAttributeConfig
+    mult: IAttributeConfig
 
     activation: {
         hidden: ActivationFunction[]
@@ -39,6 +26,7 @@ export interface IGenomeConfig {
     }
 
     mutation: {
+        single: boolean
         add_node: number
         remove_node: number
         add_connection: number
@@ -64,50 +52,42 @@ export function GenomeConfig(config: IGenomeConfig) {return config;}
  * which allows for efficient crossover of genomes.
  */
 export class Innovation {
-    private static _last = 0;
-    static get new() { return ++this._last; }
-    static get last() { return this._last; }
+    private static last = 0;
+    private static cache:Record<string,number> = {}
+    static Last() { return this.last; }
+    static New(in_id?: number, out_id?: number) {
+        if (in_id == undefined || out_id == undefined) return ++this.last;
+        let hash = in_id+'#'+out_id;
+        if (!this.cache[hash]) this.cache[hash] = ++this.last;
+        return this.cache[hash];
+    }
+    static ResetCache() {
+        this.cache = {};
+    }
+    static Ranges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
+        let a_range = [Infinity,-Infinity] as [number,number];
+        for (let i = 0; i < a.length; i++) {
+            let inn = a[i].innovation;
+            if (inn < a_range[0]) a_range[0] = inn;
+            if (inn > a_range[1]) a_range[1] = inn;
+        }
+        let b_range = [Infinity,-Infinity] as [number,number];
+        for (let i = 0; i < b.length; i++) {
+            let inn = b[i].innovation;
+            if (inn < b_range[0]) b_range[0] = inn;
+            if (inn > b_range[1]) b_range[1] = inn;
+        }
+        return {
+            a: a_range,
+            b: b_range
+        }
+    }
 }
 export interface Match {
     matching: ConnectionGene[][]
     disjoint: ConnectionGene[]
     excess: ConnectionGene[]
     larger: number
-}
-
-/**
- * Mutable Parameter (bias, weight and mult)
- */
-
-export class MutableParam {
-    
-    value: number
-
-    constructor(
-        private config: IMutableParamConfig
-    ) {
-        this.value = Gaussian(config.init.mean, config.init.stdev)();
-        if (this.value < config.min) this.value = config.min;
-        if (this.value > config.max) this.value = config.max;
-    }
-
-    Mutate() {
-        let r = Math.random();
-        if (r < this.config.mutation.prob.replace) {
-            this.value = Gaussian(this.config.init.mean, this.config.init.stdev)();
-            return;
-        }
-        else if (r < this.config.mutation.prob.offset) {
-            this.value += (Math.random()*2-1)*this.config.mutation.rate;
-        }
-    }
-
-    Clone() {
-        let clone = new MutableParam(this.config);
-        clone.value = this.value;
-        return clone;
-    }
-
 }
 
 /**
@@ -118,15 +98,15 @@ export interface NodeGene {
     id: number
     type: 'input' | 'hidden' | 'output'
     activation: ActivationFunction
-    bias: MutableParam
-    mult: MutableParam
+    bias: Attribute
+    mult: Attribute
 }
 
 export interface ConnectionGene {
     in_node: NodeGene
     out_node: NodeGene
     enabled: boolean
-    weight: MutableParam
+    weight: Attribute
     innovation: number
 }
 
@@ -171,32 +151,15 @@ export class Genome {
                 id,
                 type:'output',
                 activation: RandomActivation(config.activation.output),
-                bias: new MutableParam(config.bias),
-                mult: new MutableParam(config.mult)
+                bias: new Attribute(config.bias),
+                mult: new Attribute(config.mult)
             }
         }
     }
 
     /* Historical Gene Matching */
 
-    static InnovationRanges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
-        let a_range = [Infinity,-Infinity] as [number,number];
-        for (let i = 0; i < a.length; i++) {
-            let inn = a[i].innovation;
-            if (inn < a_range[0]) a_range[0] = inn;
-            if (inn > a_range[1]) a_range[1] = inn;
-        }
-        let b_range = [Infinity,-Infinity] as [number,number];
-        for (let i = 0; i < b.length; i++) {
-            let inn = b[i].innovation;
-            if (inn < b_range[0]) b_range[0] = inn;
-            if (inn > b_range[1]) b_range[1] = inn;
-        }
-        return {
-            a: a_range,
-            b: b_range
-        }
-    }
+    
 
     MatchGenes(peer: Genome): Match {
         let matching = [] as ConnectionGene[][];
@@ -207,7 +170,7 @@ export class Genome {
             b: peer.getConns()
         }
         
-        let ranges = Genome.InnovationRanges(conns.a, conns.b);
+        let ranges = Innovation.Ranges(conns.a, conns.b);
         let b_matches = [];
 
         for (let i = 0; i < conns.a.length; i++) {
@@ -282,14 +245,14 @@ export class Genome {
             if (conn.in_node == in_node && conn.out_node == out_node)
                 throw GenomeException.DuplicateConnection();
         })
-        let innovation = Innovation.new;
+        let innovation = Innovation.New(in_node.id, out_node.id);
         Log.Method(this,'AddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.DEBUG);
 
         this.conns.push({ 
             in_node: in_node,
             out_node: out_node,
             enabled: true,
-            weight: new MutableParam(this.config.weight),  
+            weight: new Attribute(this.config.weight),  
             innovation
         })
     }
@@ -302,9 +265,10 @@ export class Genome {
     AddNode(conn: ConnectionGene) {
         if (!conn.enabled) throw GenomeException.CantAddToDisabledConnection();
         
-        let innovation_a = Innovation.new;
-        let innovation_b = Innovation.new
+        
         let id = Object.values(this.nodes).length;
+        let innovation_a = Innovation.New(conn.in_node.id, id);
+        let innovation_b = Innovation.New(id, conn.out_node.id);
         Log.Method(this,'AddNode',`(conn:${conn.innovation}) => node:${id}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
 
         conn.enabled = false;
@@ -313,22 +277,22 @@ export class Genome {
             id,
             type: 'hidden',
             activation: RandomActivation(this.config.activation.hidden),
-            bias: new MutableParam(this.config.bias),
-            mult: new MutableParam(this.config.mult)
+            bias: new Attribute(this.config.bias),
+            mult: new Attribute(this.config.mult)
         }
 
         this.conns.push({
             in_node: conn.in_node,
             out_node: this.nodes[id],
             enabled: true,
-            weight: new MutableParam(this.config.weight),  
+            weight: new Attribute(this.config.weight),  
             innovation: innovation_a
         })
         this.conns.push({
             in_node: this.nodes[id],
             out_node: conn.out_node,
             enabled: true,
-            weight: new MutableParam(this.config.weight),  
+            weight: new Attribute(this.config.weight),  
             innovation: innovation_b
         })
 
@@ -347,18 +311,43 @@ export class Genome {
         Log.Method(this,'Mutate',`()`, LogLevel.DEBUG);
         // Topology
         try {
-            if (Math.random() < this.config.mutation.add_connection) {
-                let pair = this.RandomNodePair();
-                this.AddConnection(pair[0], pair[1]);
+            if (this.config.mutation.single) {
+                let sum = this.config.mutation.add_connection +
+                          this.config.mutation.remove_connection +
+                          this.config.mutation.add_node +
+                          this.config.mutation.remove_node;
+                let r = Math.random() * sum;
+                if (r < this.config.mutation.add_connection) {
+                    let pair = this.RandomNodePair();
+                    this.AddConnection(pair[0], pair[1]);
+                }
+                else if (r < this.config.mutation.add_connection + 
+                             this.config.mutation.remove_connection) {
+                    this.RemoveConnection(this.conns[Math.floor(Math.random()*this.conns.length)]);
+                }
+                else if (r < this.config.mutation.add_connection + 
+                             this.config.mutation.remove_connection +
+                             this.config.mutation.add_node) {
+                    this.AddNode(this.RandomEnabledConnection());
+                }
+                else {
+                    this.RemoveNode(this.nodes[Math.floor(Math.random()*Object.values(this.nodes).length)]);
+                }
             }
-            else if (Math.random() < this.config.mutation.remove_connection) {
-                this.RemoveConnection(this.conns[Math.floor(Math.random()*this.conns.length)]);
-            }
-            else if (Math.random() < this.config.mutation.add_node) {
-                this.AddNode(this.RandomEnabledConnection());
-            }
-            else if (Math.random() < this.config.mutation.remove_node) {
-                this.RemoveNode(this.nodes[Math.floor(Math.random()*Object.values(this.nodes).length)]);
+            else {
+                if (Math.random() < this.config.mutation.add_connection) {
+                    let pair = this.RandomNodePair();
+                    this.AddConnection(pair[0], pair[1]);
+                }
+                if (Math.random() < this.config.mutation.remove_connection) {
+                    this.RemoveConnection(this.conns[Math.floor(Math.random()*this.conns.length)]);
+                }
+                if (Math.random() < this.config.mutation.add_node) {
+                    this.AddNode(this.RandomEnabledConnection());
+                }
+                if (Math.random() < this.config.mutation.remove_node) {
+                    this.RemoveNode(this.nodes[Math.floor(Math.random()*Object.values(this.nodes).length)]);
+                }
             }
         }
         catch (e) { Log.Exception(e as any, LogLevel.DEBUG) + ' (ignored)' }
@@ -406,8 +395,9 @@ export class Genome {
         
         let match = this.MatchGenes(peer);    
         match.matching.map(m => {
-            let i = this.conns.indexOf(m[0]);
-            let conn = m[Math.floor(Math.random()*2)];
+            if (Math.random() < 0.5) return;
+            let i = this.conns.indexOf(m[1]);
+            let conn = m[1];
             clone.conns[i] = {
                 in_node: clone.nodes[conn.in_node.id],
                 out_node: clone.nodes[conn.out_node.id],

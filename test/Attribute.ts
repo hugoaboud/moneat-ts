@@ -1,8 +1,9 @@
 import { Activation } from "../src/Activation";
-import { Genome, Innovation, MutableParam } from "../src/Genome";
-import { DefaultMutableParamConfig } from "../src/util/Defaults";
+import { Attribute } from "../src/Attribute";
+import { Genome, Innovation } from "../src/Genome";
+import { DefaultAttributeConfig } from "../src/util/Defaults";
 import { Gaussian } from "../src/util/Random";
-import { MutableParam as Config } from "./config";
+import { Attribute as Config } from "./config";
 
 // https://stattrek.com/probability-distributions/normal.aspx
 // "About 68% of the area under the curve falls within 1 standard deviation of the mean.""
@@ -66,7 +67,7 @@ describe('Gaussian', () => {
 describe('Mutation', () => {
 
     test('Should replace the value on mutation', () => {
-        let param = new MutableParam(Config({
+        let param = new Attribute(Config({
             mutation: {
                 prob: {
                     offset: 0,
@@ -88,7 +89,7 @@ describe('Mutation', () => {
                 }
             }
         });
-        let param = new MutableParam(config);
+        let param = new Attribute(config);
         let old_value = param.value;
         param.Mutate();
         let diff = Math.abs(param.value-old_value);
@@ -98,7 +99,7 @@ describe('Mutation', () => {
     })
 
     test('Should run replace mutation according to probability', () => {
-        let param = new MutableParam(Config({
+        let param = new Attribute(Config({
             mutation: {
                 prob: {
                     offset: 0,
@@ -122,7 +123,7 @@ describe('Mutation', () => {
     })
 
     test('Should run offset mutation according to probability', () => {
-        let param = new MutableParam(Config({
+        let param = new Attribute(Config({
             mutation: {
                 prob: {
                     offset: 0.2,

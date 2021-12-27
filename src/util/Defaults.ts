@@ -1,12 +1,13 @@
 import { Activation } from "../Activation";
+import { IAttributeConfig } from "../Attribute";
 import { IEvolutionConfig } from "../Evolution";
 import { TournamentConfig, ITournamentConfig } from "../evolution/Tournament";
-import { IGenomeConfig, IMutableParamConfig } from "../Genome";
+import { IGenomeConfig } from "../Genome";
 import { Aggregation, IMONEATConfig, MONEATConfig } from "../MONEAT";
 import { DNeuralNetwork } from "../neuralnetwork/Default";
 import { DeepPartial, Merge } from "./Config";
 
-export function DefaultMutableParamConfig(config?: DeepPartial<IMutableParamConfig>): IMutableParamConfig {
+export function DefaultAttributeConfig(config?: DeepPartial<IAttributeConfig>): IAttributeConfig {
     return Merge({
         min: -30,
         max: 30,
@@ -28,14 +29,15 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
     return Merge({
         inputs: 2,
         outputs: 1,
-        bias: DefaultMutableParamConfig(),
-        weight: DefaultMutableParamConfig(),
-        mult: DefaultMutableParamConfig(),
+        bias: DefaultAttributeConfig(),
+        weight: DefaultAttributeConfig(),
+        mult: DefaultAttributeConfig(),
         activation: {
-            hidden: [Activation.Clamped],
-            output: [Activation.Clamped]
+            hidden: [Activation.Sigmoid],
+            output: [Activation.Sigmoid]
         },
         mutation: {
+            single: true,
             add_node: 0.2,
             remove_node: 0.2,
             add_connection: 0.5,
@@ -56,7 +58,6 @@ export function DefaultTournamentConfig(config?: DeepPartial<ITournamentConfig>)
     return Merge(TournamentConfig({
         elit: 2,
         death_rate: 0.5,
-        crossover_rate: 0.7,
         stagnation: {
             threshold: 0.001,
             max_epochs: 20,

@@ -192,7 +192,7 @@ export default class MONEAT {
         // Run epochs
         let evolution = new (this.config.evolution.class as any)(this.config)
         for (let e = 0; e < epochs; e++) {
-            
+
             // Reset networks and fitnesses
             this.population.map(ind => this.ResetNetworkAndFitness(ind));
             // Calculate fitnesses
@@ -212,6 +212,7 @@ export default class MONEAT {
             }
             
             // Evolution epoch
+            Innovation.ResetCache();
             this.population = evolution.Epoch(this);
             this.Speciate();
         }
