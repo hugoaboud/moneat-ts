@@ -11,8 +11,6 @@ import { StringID } from "./util/Random";
  * Genome Configuration
  */
 
-
-
 export interface IGenomeConfig {
 
     inputs: number
@@ -96,8 +94,6 @@ export class Genome {
 
     /* Historical Gene Matching */
 
-    
-
     MatchGenes(peer: Genome): Match {
         let matching = [] as ConnectionGene[][];
         let disjoint = [] as ConnectionGene[];
@@ -179,13 +175,13 @@ export class Genome {
         if (in_node.type === 'output') throw GenomeException.CantConnectFromOutput();
         if (out_node.type === 'input') throw GenomeException.CantConnectToInput();
         this.conns.map(conn => {
-            if (conn.in_node == in_node && conn.out_node == out_node)
+            if (conn.in_node == in_node.id && conn.out_node == out_node.id)
                 throw GenomeException.DuplicateConnection();
         })
         let innovation = Innovation.New(in_node.id, out_node.id);
         Log.Method(this,'AddConnection',`(in:${in_node.id}, out:${out_node.id}) => conn:${innovation}`, LogLevel.DEBUG);
 
-        this.conns.push(new ConnectionGene(in_node, out_node, this.config));
+        this.conns.push(new ConnectionGene(in_node.id, out_node.id, this.config));
     }
 
     RemoveConnection(conn: ConnectionGene) {
@@ -200,8 +196,8 @@ export class Genome {
         let id = Object.values(this.nodes).length;
         this.nodes[id] = new NodeGene(id, 'hidden', this.config);
 
-        let c0 = new ConnectionGene(conn.in_node, this.nodes[id], this.config);
-        let c1 = new ConnectionGene(this.nodes[id], conn.out_node, this.config);
+        let c0 = new ConnectionGene(conn.in_node, id, this.config);
+        let c1 = new ConnectionGene(id, conn.out_node, this.config);
         this.conns.push(c0)
         this.conns.push(c1)
 
@@ -214,7 +210,7 @@ export class Genome {
         if (node.id < this.config.inputs+this.config.outputs) throw GenomeException.CantRemoveOutputNode();
         delete this.nodes[node.id];
         this.conns = this.conns.filter(conn =>
-            conn.in_node != node && conn.out_node != node )
+            conn.in_node != node.id && conn.out_node != node.id )
     }
 
     Mutate() {
@@ -273,27 +269,34 @@ export class Genome {
         let clone = new Genome(this.config);
         clone.nodes = Object.values(this.nodes).reduce((a:Record<number,NodeGene>,x) => {
             a[x.id] = x.Clone()
-            return a;
-        }, {});
-        clone.conns = this.conns.map(conn => conn.Clone(clone));
+            return a;        }, {});
+        clone.conns = this.conns.map(conn => conn.Clone());
         return clone;
     }
 
     Crossover(peer: Genome): Genome {
         // "In composing the offspring/, genes are randomly chosen from either parent at matching genes,
         // whereas all excess or disjoint genes are always included from the more fit parent."
-        // In our case, "this" is always the more fit parent.
-
-        let clone = this.Clone();
+        // On our case, we assume "this" is the fittest parent.
         
-        let match = this.MatchGenes(peer);    
-        match.matching.map(m => {
-            if (Math.random() < 0.5) return;
-            let i = this.conns.indexOf(m[1]);
-            let conn = m[1];
-            clone.conns[i] = conn.Clone(clone);
+        let clone = new Genome(this.config);
+        
+        Object.values(this.nodes).map(node => {
+            if (peer.nodes[node.id])
+                clone.nodes[node.id] = node.Crossover(peer.nodes[node.id]);
+            else
+                clone.nodes[node.id] = node.Clone();
         })
 
+        let peer_innovations = peer.conns.map(c => c.innovation);
+        this.conns.map(conn => {
+            let peer_i = peer_innovations.indexOf(conn.innovation);
+            if (peer_i >= 0)
+                clone.conns.push(conn.Crossover(peer.conns[peer_i]));
+            else
+                clone.conns.push(conn.Clone());
+        })
+        
         return clone;
     }
 

@@ -218,12 +218,12 @@ describe('Mutation', () => {
             genome.AddNode(genome.getConns()[0]);
             
             expect(genome.getConns()[1]).toBeDefined();
-            expect(genome.getConns()[1].in_node).toBe(genome.getNodes()[0]);
-            expect(genome.getConns()[1].out_node).toBe(genome.getNodes()[6]);
+            expect(genome.getConns()[1].in_node).toBe(0);
+            expect(genome.getConns()[1].out_node).toBe(6);
             expect(genome.getConns()[1].enabled).toBe(true);
             expect(genome.getConns()[2]).toBeDefined();
-            expect(genome.getConns()[2].in_node).toBe(genome.getNodes()[6]);
-            expect(genome.getConns()[2].out_node).toBe(genome.getNodes()[3]);
+            expect(genome.getConns()[2].in_node).toBe(6);
+            expect(genome.getConns()[2].out_node).toBe(3);
             expect(genome.getConns()[2].enabled).toBe(true);
         });
     
@@ -329,8 +329,6 @@ describe('Clone', () => {
             let genome_conn = genome.getConns()[i];
             let clone_conn = clone.getConns()[i];
             expect(clone_conn).not.toBe(genome_conn);    
-            if (clone_conn.in_node) expect(clone_conn.in_node).not.toBe(genome_conn.in_node);
-            if (clone_conn.out_node) expect(clone_conn.out_node).not.toBe(genome_conn.out_node);
             if (clone_conn.weight) expect(clone_conn.weight).not.toBe(genome_conn.out_node);
         }
     });
@@ -341,13 +339,11 @@ describe('Clone', () => {
         genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
         genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
         let clone = genome.Clone();
-        let genome_nodes = genome.getNodes();
-        let clone_nodes = clone.getNodes();
         for (let i = 0; i < genome.getConns().length; i++) {
             let genome_conn = genome.getConns()[i];
             let clone_conn = clone.getConns()[i];
-            expect(genome_conn.in_node.id).toEqual(clone_conn.in_node.id);
-            expect(genome_conn.out_node.id).toEqual(clone_conn.out_node.id);
+            expect(genome_conn.in_node).toEqual(clone_conn.in_node);
+            expect(genome_conn.out_node).toEqual(clone_conn.out_node);
             expect(genome_conn.enabled).toEqual(clone_conn.enabled);
             expect(genome_conn.weight.value).toEqual(clone_conn.weight.value);
             expect(genome_conn.innovation).toEqual(clone_conn.innovation);

@@ -1,7 +1,5 @@
 import Evolution, { IEvolutionConfig } from "../Evolution";
-import { Genome } from "../Genome";
-import MONEAT, { IMONEATConfig, Species } from "../MONEAT";
-import Population, { Individual } from "../MONEAT";
+import MONEAT, { IMONEATConfig, Individual, Species } from "../MONEAT";
 import Log, { LogLevel } from "../util/Log";
 
 export interface ITournamentConfig extends IEvolutionConfig {

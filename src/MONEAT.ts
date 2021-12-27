@@ -173,7 +173,6 @@ export default class MONEAT {
 
             for (let j = 0; j < sn; j++) {
                 let ind = s.population[j];
-
                 ind.shared_fitness = ind.fitness.map((f,k) => {
                     let fit = f/sn;
                     s.fitness[k] += fit;

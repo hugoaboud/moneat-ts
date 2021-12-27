@@ -42,24 +42,25 @@ export class Graph {
 
         // Step 1+: walk on the graph
         let next = {} as Record<number,GraphNode>;
-        
+        let nodes = this.genome.getNodes();
+
         for (let i = 0; i < this.conns.length; i++) {
             let conn = this.conns[i];
             if (!conn.enabled) continue;
-            if (this.seen.includes(conn.out_node.id)) continue;
+            if (this.seen.includes(conn.out_node)) continue;
             
-            if (this.last.indexOf(conn.in_node) >= 0) {
-                if (!next[conn.out_node.id])
-                    next[conn.out_node.id] = {gene: conn.out_node, inputs:[]};    
+            if (this.last.indexOf(nodes[conn.in_node]) >= 0) {
+                if (!next[conn.out_node])
+                    next[conn.out_node] = {gene: nodes[conn.out_node], inputs:[]};    
             }
             
-            if (next[conn.out_node.id])
-                next[conn.out_node.id].inputs.push(conn)
+            if (next[conn.out_node])
+                next[conn.out_node].inputs.push(conn)
         }
         
-        let nodes = Object.values(next);
-        this.last = nodes.map(n => n.gene);
-        return nodes;
+        let layer = Object.values(next);
+        this.last = layer.map(n => n.gene);
+        return layer;
     }
 
 }

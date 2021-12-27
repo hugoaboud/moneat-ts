@@ -90,7 +90,7 @@ import Log, { LogLevel } from "../util/Log"
     protected BuildStep(node: NodeGene, inputs: ConnectionGene[]) {
         let step = [inputs.length];
         for (let i = 0; i < inputs.length; i++) {
-            step.push(this.id_to_i[inputs[i].in_node.id]);
+            step.push(this.id_to_i[inputs[i].in_node]);
             step.push(inputs[i].weight.value);
         }
         step.push(node.mult.value);

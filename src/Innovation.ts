@@ -8,16 +8,20 @@ import { ConnectionGene } from "./Gene";
  export class Innovation {
     private static last = 0;
     private static cache:Record<string,number> = {}
+
     static Last() { return this.last; }
+    
     static New(in_id?: number, out_id?: number) {
-        if (in_id == undefined || out_id == undefined) return ++this.last;
         let hash = in_id+'#'+out_id;
+        if (in_id == undefined || out_id == undefined) return ++this.last;
         if (!this.cache[hash]) this.cache[hash] = ++this.last;
         return this.cache[hash];
     }
+    
     static ResetCache() {
         this.cache = {};
     }
+    
     static Ranges(a: ConnectionGene[], b: ConnectionGene[]): {a:[number,number], b:[number,number]}{
         let a_range = [Infinity,-Infinity] as [number,number];
         for (let i = 0; i < a.length; i++) {

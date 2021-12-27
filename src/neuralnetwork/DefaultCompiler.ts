@@ -42,7 +42,7 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
             
             cmd.push(conns.length);
             for (let i = 0; i < conns.length; i++) {
-                cmd.push(id_to_i[conns[i].in_node.id]);
+                cmd.push(id_to_i[conns[i].in_node]);
                 cmd.push(conns[i].weight.value);
             }
             cmd.push(node.mult.value);

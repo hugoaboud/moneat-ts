@@ -83,27 +83,27 @@ export default class Log {
         
         console.log(Colored('-connections:', 'lightgray'));
         conns.map((conn,i) => {
+            let in_node = nodes[conn.in_node];
+            let out_node = nodes[conn.out_node];
             let color_in = {
                 input: 'blue',
                 hidden: 'green',
                 output: 'purple'
-            }[conn.in_node.type];
+            }[in_node.type];
             let color_out = {
                 input: 'blue',
                 hidden: 'green',
                 output: 'purple'
-            }[conn.out_node.type];
+            }[out_node.type];
             let color = null as any;
             if (!conn.enabled) {
                 color = 'darkgray';
             }
-            let i_in = conn.in_node.id;
-            let i_out = conn.out_node.id;
             console.log(
                 Colored(`\t${(conn.innovation+'   ').slice(0,4)} `, color || 'lightblue') +
-                Colored(`${(i_in+'  ').slice(0,3)} `, color || color_in) +
+                Colored(`${(conn.in_node+'  ').slice(0,3)} `, color || color_in) +
                 Colored(' -> ', color) +
-                Colored(`${(i_out+'  ').slice(0,3)} `, color || color_out) + 
+                Colored(`${(conn.out_node+'  ').slice(0,3)} `, color || color_out) + 
                 Colored('w:','darkgray') + Colored(conn.weight.value.toFixed(3), color)
             )
         })

@@ -39,7 +39,7 @@ function XOR(network: NeuralNetwork): number {
     let e = 0;
     for (let i = 0; i < Input.length; i++) {
         let out = network.Run(Input[i], true);
-        e -= Math.abs(out[0] - Output[i]);
+        e -= (out[0] - Output[i])*(out[0] - Output[i]);
     }
     return e;
 }
@@ -55,7 +55,7 @@ const Config = DefaultMONEATConfig({
     fitness: [XOR]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(100);
+let population = MoNeat.Evolve(20);
 
 let winner = population[0];
 
