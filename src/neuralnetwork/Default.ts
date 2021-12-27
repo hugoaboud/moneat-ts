@@ -23,6 +23,7 @@ import Log, { LogLevel } from "../util/Log"
 
     // [0.value, 1.value, 2.value, ...]
     protected nodes!: number[]
+    protected id_to_i!: Record<number,number>
     // [0.activation, 1.activation, ...]
     protected actvs!: ActivationFunction[]
     // [n, 0.id, weight, 1.id, weight, ..., mult, bias, out.id]
@@ -67,12 +68,14 @@ import Log, { LogLevel } from "../util/Log"
     }
     protected BuildNodesAndActivations() {
         let nodes = this.graph.genome.getNodes();
-        this.nodes = Array(nodes.length).fill(0);
-
+        this.nodes = [];
+        this.id_to_i = {};
         this.actvs = [];
-        for (let i = 0; i < nodes.length; i++) {
-            this.actvs.push(nodes[i].activation);
-        }
+        Object.values(nodes).map(node => {
+            this.id_to_i[node.id] = this.nodes.length;
+            this.nodes.push(0);
+            this.actvs.push(node.activation);
+        })
     }
     protected BuildStepLayer(layer: GraphNode[]) {
         for (let n = 0; n < layer.length; n++) {
@@ -86,12 +89,12 @@ import Log, { LogLevel } from "../util/Log"
     protected BuildStep(node: NodeGene, inputs: ConnectionGene[]) {
         let step = [inputs.length];
         for (let i = 0; i < inputs.length; i++) {
-            step.push(inputs[i].in_node.id);
+            step.push(this.id_to_i[inputs[i].in_node.id]);
             step.push(inputs[i].weight.value);
         }
         step.push(node.mult.value);
         step.push(node.bias.value);
-        step.push(node.id);
+        step.push(this.id_to_i[node.id]);
 
         if (Log.Level === LogLevel.DEBUG)
             Log.Data(this,'step',step, LogLevel.DEBUG);

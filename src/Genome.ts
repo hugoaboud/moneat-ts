@@ -140,7 +140,7 @@ export class Genome {
 
     private id: string
 
-    private nodes: NodeGene[] = []
+    private nodes: Record<number,NodeGene> = {}
     private conns: ConnectionGene[] = []
 
     constructor(
@@ -155,23 +155,25 @@ export class Genome {
         Log.Method(this, 'new', `(ins:${config.inputs},outs:${config.outputs})`, LogLevel.DEBUG);
 
         for (let i = 0; i < config.inputs; i++) {
-            this.nodes.push({
-                id: this.nodes.length,
+            let id = Object.values(this.nodes).length;
+            this.nodes[id] = {
+                id,
                 type:'input',
                 activation: null as any,
                 bias: null as any,
                 mult: null as any
-            })
+            }
         }
 
         for (let i = 0; i < config.outputs; i++) {
-            this.nodes.push({
-                id: this.nodes.length,
+            let id = Object.values(this.nodes).length;
+            this.nodes[id] = {
+                id,
                 type:'output',
                 activation: RandomActivation(config.activation.output),
                 bias: new MutableParam(config.bias),
                 mult: new MutableParam(config.mult)
-            })
+            }
         }
     }
 
@@ -247,8 +249,8 @@ export class Genome {
 
     RandomNodePair() {
         let nodes = this.getNodes();
-        let in_nodes = nodes.filter(n => n.type !== 'output');
-        let out_nodes = nodes.filter(n => n.type !== 'input');
+        let in_nodes = Object.values(nodes).filter(n => n.type !== 'output');
+        let out_nodes = Object.values(nodes).filter(n => n.type !== 'input');
 
         let in_node = in_nodes[Math.floor(Math.random()*in_nodes.length)];
         
@@ -302,27 +304,28 @@ export class Genome {
         
         let innovation_a = Innovation.new;
         let innovation_b = Innovation.new
-        Log.Method(this,'AddNode',`(conn:${conn.innovation}) => node:${this.nodes.length}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
+        let id = Object.values(this.nodes).length;
+        Log.Method(this,'AddNode',`(conn:${conn.innovation}) => node:${id}, conns:(${innovation_a},${innovation_b})`, LogLevel.DEBUG);
 
         conn.enabled = false;
 
-        this.nodes.push({
-            id: this.nodes.length,
+        this.nodes[id] = {
+            id,
             type: 'hidden',
             activation: RandomActivation(this.config.activation.hidden),
             bias: new MutableParam(this.config.bias),
             mult: new MutableParam(this.config.mult)
-        })
+        }
 
         this.conns.push({
             in_node: conn.in_node,
-            out_node: this.nodes[this.nodes.length-1],
+            out_node: this.nodes[id],
             enabled: true,
             weight: new MutableParam(this.config.weight),  
             innovation: innovation_a
         })
         this.conns.push({
-            in_node: this.nodes[this.nodes.length-1],
+            in_node: this.nodes[id],
             out_node: conn.out_node,
             enabled: true,
             weight: new MutableParam(this.config.weight),  
@@ -333,12 +336,9 @@ export class Genome {
     
     RemoveNode(node: NodeGene) {
         Log.Method(this,'RemoveNode',`(node:${node.id})`, LogLevel.DEBUG);
-        let n = this.nodes.indexOf(node);
-        if (n < this.config.inputs) throw GenomeException.CantRemoveInputNode();
-        if (n < this.config.inputs+this.config.outputs) throw GenomeException.CantRemoveOutputNode();
-
-        this.nodes.slice(n).map(node => node.id--);
-        this.nodes.splice(n,1);
+        if (node.id < this.config.inputs) throw GenomeException.CantRemoveInputNode();
+        if (node.id < this.config.inputs+this.config.outputs) throw GenomeException.CantRemoveOutputNode();
+        delete this.nodes[node.id];
         this.conns = this.conns.filter(conn =>
             conn.in_node != node && conn.out_node != node )
     }
@@ -358,13 +358,13 @@ export class Genome {
                 this.AddNode(this.RandomEnabledConnection());
             }
             else if (Math.random() < this.config.mutation.remove_node) {
-                this.RemoveNode(this.nodes[Math.floor(Math.random()*this.nodes.length)]);
+                this.RemoveNode(this.nodes[Math.floor(Math.random()*Object.values(this.nodes).length)]);
             }
         }
         catch (e) { Log.Exception(e as any, LogLevel.DEBUG) + ' (ignored)' }
         
         // Mutable Params
-        this.nodes.map(node => {
+        Object.values(this.nodes).map(node => {
             node.bias?.Mutate();
             node.mult?.Mutate();
         })
@@ -377,16 +377,19 @@ export class Genome {
     
     Clone(): Genome {
         let clone = new Genome(this.config);
-        clone.nodes = this.nodes.map((node,id) => ({
-            id,
-            type: node.type,
-            activation: node.activation,
-            bias: node.bias?.Clone(),
-            mult: node.mult?.Clone()
-        }));
-        clone.conns = this.conns.map((conn,id) => ({
-            in_node: clone.nodes[this.nodes.indexOf(conn.in_node)],
-            out_node: clone.nodes[this.nodes.indexOf(conn.out_node)],
+        clone.nodes = Object.values(this.nodes).reduce((a:Record<number,NodeGene>,x) => {
+            a[x.id] = {
+                id: x.id,
+                type: x.type,
+                activation: x.activation,
+                bias: x.bias?.Clone(),
+                mult: x.mult?.Clone()
+            }
+            return a;
+        }, {});
+        clone.conns = this.conns.map(conn => ({
+            in_node: clone.nodes[conn.in_node.id],
+            out_node: clone.nodes[conn.out_node.id],
             enabled: conn.enabled,
             weight: conn.weight.Clone(),
             innovation: conn.innovation
@@ -406,8 +409,8 @@ export class Genome {
             let i = this.conns.indexOf(m[0]);
             let conn = m[Math.floor(Math.random()*2)];
             clone.conns[i] = {
-                in_node: clone.nodes[this.nodes.indexOf(m[0].in_node)],
-                out_node: clone.nodes[this.nodes.indexOf(m[0].out_node)],
+                in_node: clone.nodes[conn.in_node.id],
+                out_node: clone.nodes[conn.out_node.id],
                 enabled: conn.enabled,
                 weight: conn.weight.Clone(),
                 innovation: conn.innovation
@@ -424,9 +427,9 @@ export class Genome {
     public getConns() { return this.conns }
 
     public getInputCount() { return this.config.inputs };
-    public getInputs() { return this.nodes.filter(node => node.type === 'input') };
+    public getInputs() { return Object.values(this.nodes).slice(0,this.config.inputs) };
     public getOutputCount() { return this.config.outputs };
-    public getOutputs() { return this.nodes.filter(node => node.type === 'output') };
+    public getOutputs() { return Object.values(this.nodes).slice(this.config.inputs,this.config.outputs) };
 
 }
 

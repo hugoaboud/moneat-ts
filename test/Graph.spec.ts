@@ -11,7 +11,8 @@ describe('Walk', () => {
             let genome = new Genome(Config.Genome());
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(genome.getNodes().slice(0,3))            
+            let nodes = Object.values(genome.getNodes());
+            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,3))            
         });
     
         test('Should return inputs on first walk (16 inputs, random connections)', async () => {
@@ -26,7 +27,8 @@ describe('Walk', () => {
             }
             let graph = new Graph(genome);
             let inputs = graph.Walk();
-            expect(inputs.map(n => n.gene)).toEqual(genome.getNodes().slice(0,16))
+            let nodes = Object.values(genome.getNodes());
+            expect(inputs.map(n => n.gene)).toEqual(nodes.slice(0,16))
         });
     
     })
@@ -40,7 +42,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
             let graph = new Graph(genome);
@@ -57,7 +59,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -81,7 +83,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -106,7 +108,7 @@ describe('Walk', () => {
                 inputs: 1,
                 outputs: 1
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[1]);
             genome.AddNode(conns[0]); // 2
@@ -136,7 +138,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);
@@ -167,7 +169,7 @@ describe('Walk', () => {
                 inputs: 2,
                 outputs: 2
             }));
-            let nodes = genome.getNodes();
+            let nodes = Object.values(genome.getNodes());
             let conns = genome.getConns();
             genome.AddConnection(nodes[0], nodes[2]);
             genome.AddConnection(nodes[1], nodes[3]);

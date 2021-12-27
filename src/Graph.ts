@@ -7,7 +7,6 @@ export interface GraphNode {
 
 export class Graph {
 
-    protected nodes: NodeGene[]
     protected conns: ConnectionGene[]
 
     protected last?: NodeGene[]
@@ -16,7 +15,6 @@ export class Graph {
     constructor(
         public genome: Genome
     ) {
-        this.nodes = this.genome.getNodes();
         this.conns = this.genome.getConns();
     }
 

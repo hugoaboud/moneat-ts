@@ -19,14 +19,16 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
 
     // Activations
     let acts = {} as Record<string, string>;
-    for (let i = inputs; i < nodes.length; i++) {
-        let act = nodes[i].activation;
+    let id_to_i = {} as Record<number, number>;
+    Object.values(nodes).map((node,i) => {
+        let act = node.activation;
         if (!acts[act.name]) {
             acts[act.name] = act.toString().replace(/ {4}|\t/g,'').replace(/\n/g,' ');
         }
-    }
+        id_to_i[node.id] = i;
+    })
     file += `const a = [${Object.values(acts).join(',\n')}]\n`;
-    file += `const n = Array(${nodes.length}).fill(0);\n`
+    file += `const n = Array(${Object.values(nodes).length}).fill(0);\n`
 
     // Run
     let cmds = []
@@ -40,13 +42,13 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
             
             cmd.push(conns.length);
             for (let i = 0; i < conns.length; i++) {
-                cmd.push(conns[i].in_node.id);
+                cmd.push(id_to_i[conns[i].in_node.id]);
                 cmd.push(conns[i].weight.value);
             }
             cmd.push(node.mult.value);
             cmd.push(node.bias.value);
             cmd.push(Object.keys(acts).indexOf(node.activation.name));
-            cmd.push(node.id);
+            cmd.push(id_to_i[node.id]);
             cmds.push(cmd);
         }
         if (!layer.length) break;
