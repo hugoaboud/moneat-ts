@@ -42,7 +42,7 @@ export interface IGenomeConfig {
         }
     }
     
-    recurrent: boolean
+    feedforward: boolean
 
 }
 export function GenomeConfig(config: IGenomeConfig) {return config;}
@@ -150,17 +150,7 @@ export class Genome {
         let out_nodes = Object.values(nodes).filter(n => n.type !== 'input');
 
         let in_node = in_nodes[Math.floor(Math.random()*in_nodes.length)];
-        
-        let out_node = null;
-        if (this.config.recurrent) {
-            out_node = out_nodes[Math.floor(Math.random()*out_nodes.length)];
-        }
-        else {
-            while (!out_node) {
-                out_node = out_nodes[Math.floor(Math.random()*out_nodes.length)];
-                if (out_node == in_node) out_node = null;
-            }
-        }
+        let out_node = out_nodes[Math.floor(Math.random()*out_nodes.length)];
 
         return [in_node, out_node]
     }
@@ -172,6 +162,27 @@ export class Genome {
 
     /* Mutation */
 
+    isRecurrentConnection(in_node: NodeGene, out_node:NodeGene) {
+        if (in_node == out_node) return true;
+        let layer = [in_node];
+        while (layer.length) {
+            let next = [];
+            for (let l = 0; l < layer.length; l++) {
+                for (let c = 0; c < this.conns.length; c++) {
+                    let conn = this.conns[c];
+                    let out = this.nodes[conn.out_node];
+                    if (conn.in_node != layer[l].id) break;
+                    if (out.type == 'input') break;
+                    if (out.type == 'output') break;
+                    if (conn.out_node === in_node.id) return true;
+                    next.push(out);
+                }
+            }
+            layer = next;
+        }
+        return false;
+    }
+
     AddConnection(in_node: NodeGene, out_node: NodeGene) {
         Log.Method(this,'AddConnection',`(in:${in_node?.id}, out:${out_node?.id})`, LogLevel.DEBUG);
         if (!in_node || !out_node) throw GenomeException.EmptyInput();
@@ -181,6 +192,8 @@ export class Genome {
             if (conn.in_node == in_node.id && conn.out_node == out_node.id)
             throw GenomeException.DuplicateConnection();
         })
+        if (this.config.feedforward && this.isRecurrentConnection(in_node, out_node))
+            throw GenomeException.RecurrentConnectionNotAllowed();
         let conn = new ConnectionGene(in_node.id, out_node.id, this.config);
         this.conns.push(conn);
         Log.Method(this,'AddConnection',` => conn:${conn.innovation}`, LogLevel.DEBUG);
@@ -321,6 +334,7 @@ export class Genome {
 
     public getID() { return this.id }
     public getNodes() { return this.nodes }
+    public getNodeCount() { return Object.keys(this.nodes).length }
     public getConns() { return this.conns }
 
     public getInputCount() { return this.config.inputs };
@@ -361,6 +375,9 @@ class GenomeException extends Exception {
     }
     static DuplicateConnection() {
         return new this('Can\'t create duplicate connection', this.code);
+    }
+    static RecurrentConnectionNotAllowed() {
+        return new this('Can\'t create a recurrent connection on a feed-forward genome', this.code);
     }
     static CantAddToDisabledConnection() {
         return new this('Can\'t add a node to a disabled connection', this.code);

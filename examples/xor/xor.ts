@@ -35,7 +35,7 @@ console.log(Header('Example: XOR'))
 const Input = [ [0,0],[0,1],[1,0],[1,1] ]
 const Output = [ 0,1,1,0 ]
 
-function XOR(network: NeuralNetwork): number {
+function Fitness(network: NeuralNetwork): number {
     let e = 0;
     for (let i = 0; i < Input.length; i++) {
         let out = network.Run(Input[i], true);
@@ -44,7 +44,7 @@ function XOR(network: NeuralNetwork): number {
     return 4-e;
 }
 
-function Stop(best: number[], avg: number[]): boolean {
+function Goal(best: number[], avg: number[]): boolean {
     if (best[0] > 3.9) return true;
     return false;
 }
@@ -58,15 +58,14 @@ function Stop(best: number[], avg: number[]): boolean {
 
 const Config = DefaultMONEATConfig({
     population: 100,
-    fitness: [XOR]
+    fitness: [Fitness]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(1000, Stop);
+let population = MoNeat.Evolve(100, Goal);
+
 
 let winner = population[0];
-
 Log.Genome(winner.genome);
-
 console.log('0 , 0 => ' + winner.network.Run([0,0], true));
 console.log('0 , 1 => ' + winner.network.Run([0,1], true));
 console.log('1 , 0 => ' + winner.network.Run([1,0], true));

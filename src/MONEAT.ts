@@ -99,7 +99,10 @@ export default class MONEAT {
     CompatibilityDistance(a: Genome, b: Genome) {
         let match = a.MatchGenes(b);
         
-        let N = match.larger;
+        let a_small = a.getNodeCount() < 20;
+        let b_small = b.getNodeCount() < 20;
+
+        let N = (a_small && b_small)?1:match.larger;
         if (N == 0) return 0;
 
         let E = match.excess.length;
@@ -195,6 +198,7 @@ export default class MONEAT {
         // Run epochs
         let evolution = new (this.config.evolution.class as any)(this.config)
         for (let e = 0; e < epochs; e++) {
+            Log.Method(this, `Evolve.${e}`, `()`, LogLevel.INFO);
 
             // Reset networks and fitnesses
             this.population.map(ind => this.ResetNetworkAndFitness(ind));

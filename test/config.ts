@@ -19,7 +19,7 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGeno
         output: [Activation.Linear]
     },
     
-    recurrent: true
+    feedforward: true
     
 }), config);
 
