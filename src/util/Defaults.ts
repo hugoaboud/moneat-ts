@@ -1,5 +1,5 @@
 import { Activation } from "../Activation";
-import { IAttributeConfig } from "../Attribute";
+import { IBooleanAttributeConfig, INumericAttributeConfig } from "../Attribute";
 import { IEvolutionConfig } from "../Evolution";
 import { TournamentConfig, ITournamentConfig } from "../evolution/Tournament";
 import { IGenomeConfig } from "../Genome";
@@ -7,7 +7,7 @@ import { Aggregation, IMONEATConfig, MONEATConfig } from "../MONEAT";
 import { DNeuralNetwork } from "../neuralnetwork/Default";
 import { DeepPartial, Merge } from "./Config";
 
-export function DefaultAttributeConfig(config?: DeepPartial<IAttributeConfig>): IAttributeConfig {
+export function DefaultNumericAttributeConfig(config?: DeepPartial<INumericAttributeConfig>): INumericAttributeConfig {
     return Merge({
         min: -30,
         max: 30,
@@ -24,14 +24,41 @@ export function DefaultAttributeConfig(config?: DeepPartial<IAttributeConfig>): 
         }
     }, config);
 }
+export function DefaultBooleanAttributeConfig(config?: DeepPartial<IBooleanAttributeConfig>): IBooleanAttributeConfig {
+    return Merge({
+        init: true,
+        mutation: {
+            prob: 0.01
+        }
+    }, config);
+}
 
 export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenomeConfig {
     return Merge({
         inputs: 2,
         outputs: 1,
-        bias: DefaultAttributeConfig(),
-        weight: DefaultAttributeConfig(),
-        mult: DefaultAttributeConfig(),
+        bias: DefaultNumericAttributeConfig(),
+        mult: DefaultNumericAttributeConfig({
+            init: {
+                mean: 1,
+                stdev: 0
+            },
+            mutation: {
+                rate: 0,
+                prob: {
+                    offset: 0,
+                    replace: 0
+                }
+            }
+        }),
+        weight: DefaultNumericAttributeConfig({
+            mutation: {
+                prob: {
+                    offset: 0.8
+                }
+            }
+        }),
+        enabled: DefaultBooleanAttributeConfig(),
         activation: {
             hidden: [Activation.Sigmoid],
             output: [Activation.Sigmoid]
@@ -57,7 +84,7 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
 export function DefaultTournamentConfig(config?: DeepPartial<ITournamentConfig>): ITournamentConfig {
     return Merge(TournamentConfig({
         elit: 2,
-        death_rate: 0.5,
+        death_rate: 0.8,
         stagnation: {
             threshold: 0.001,
             max_epochs: 20,
@@ -73,8 +100,8 @@ export function DefaultMONEATConfig(config?: DeepPartial<IMONEATConfig>): IMONEA
         species: {
             fitness_aggr: Aggregation.Sum,
             compatibility: {
-                excess_coeff: 1.0,
-                disjoint_coeff: 1.0,
+                excess_coeff: 0.5,
+                disjoint_coeff: 0.5,
                 weights_coeff: 0.5,
                 threshold: 3.0
             }

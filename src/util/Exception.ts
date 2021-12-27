@@ -1,6 +1,9 @@
 export class Exception extends Error {
 
-    constructor(msg: string, code: string) {
+    constructor(
+        public msg: string, 
+        public code: string
+    ) {
         super(`${code}: ${msg}`);
     }
 

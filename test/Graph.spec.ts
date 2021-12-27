@@ -89,7 +89,7 @@ describe('Walk', () => {
             genome.AddConnection(nodes[1], nodes[3]);
             genome.AddNode(conns[0]); // 4
             genome.AddNode(conns[1]); // 5
-            conns[2].enabled = false;
+            conns[2].enabled.value = false;
             let graph = new Graph(genome);
             let inputs = graph.Walk();
             expect(inputs.map(n => n.gene)).toEqual(Object.values(nodes).slice(0,2))

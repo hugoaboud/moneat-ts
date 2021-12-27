@@ -46,7 +46,7 @@ export class Graph {
 
         for (let i = 0; i < this.conns.length; i++) {
             let conn = this.conns[i];
-            if (!conn.enabled) continue;
+            if (!conn.enabled.value) continue;
             if (this.seen.includes(conn.out_node)) continue;
             
             if (this.last.indexOf(nodes[conn.in_node]) >= 0) {

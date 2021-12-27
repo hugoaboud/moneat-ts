@@ -39,9 +39,14 @@ function XOR(network: NeuralNetwork): number {
     let e = 0;
     for (let i = 0; i < Input.length; i++) {
         let out = network.Run(Input[i], true);
-        e -= (out[0] - Output[i])*(out[0] - Output[i]);
+        e += Math.abs(out[0] - Output[i]);
     }
-    return e;
+    return 4-e;
+}
+
+function Stop(best: number[], avg: number[]): boolean {
+    if (best[0] > 3.9) return true;
+    return false;
 }
 
 /*
@@ -52,10 +57,11 @@ function XOR(network: NeuralNetwork): number {
 */
 
 const Config = DefaultMONEATConfig({
+    population: 100,
     fitness: [XOR]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(20);
+let population = MoNeat.Evolve(1000, Stop);
 
 let winner = population[0];
 

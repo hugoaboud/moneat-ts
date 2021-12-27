@@ -1,7 +1,7 @@
 import { Activation } from "../src/Activation";
-import { Attribute } from "../src/Attribute";
+import { NumericAttribute } from "../src/Attribute";
 import { Genome } from "../src/Genome";
-import { DefaultAttributeConfig } from "../src/util/Defaults";
+import { DefaultNumericAttributeConfig } from "../src/util/Defaults";
 import { Gaussian } from "../src/util/Random";
 import { Attribute as Config } from "./config";
 
@@ -67,7 +67,7 @@ describe('Gaussian', () => {
 describe('Mutation', () => {
 
     test('Should replace the value on mutation', () => {
-        let param = new Attribute(Config({
+        let param = new NumericAttribute(Config({
             mutation: {
                 prob: {
                     offset: 0,
@@ -89,7 +89,7 @@ describe('Mutation', () => {
                 }
             }
         });
-        let param = new Attribute(config);
+        let param = new NumericAttribute(config);
         let old_value = param.value;
         param.Mutate();
         let diff = Math.abs(param.value-old_value);
@@ -99,7 +99,7 @@ describe('Mutation', () => {
     })
 
     test('Should run replace mutation according to probability', () => {
-        let param = new Attribute(Config({
+        let param = new NumericAttribute(Config({
             mutation: {
                 prob: {
                     offset: 0,
@@ -123,7 +123,7 @@ describe('Mutation', () => {
     })
 
     test('Should run offset mutation according to probability', () => {
-        let param = new Attribute(Config({
+        let param = new NumericAttribute(Config({
             mutation: {
                 prob: {
                     offset: 0.2,

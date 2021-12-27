@@ -14,6 +14,12 @@ const LogColor = {
     [LogLevel.DEBUG]: 'lightpurple'
 }
 
+function LevelString(level: LogLevel) {
+    if (level === LogLevel.INFO) return 'INFO ';
+    return LogLevel[level];
+}
+
+
 export default class Log {
     
     static Level = LogLevel.INFO
@@ -25,7 +31,7 @@ export default class Log {
         if (origin === 'Genome' || origin === 'NN_Walker') origin  += Colored(' ' + (domain as any).id, 'lightblue');
 
         console.log(
-            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(LevelString(level), LogColor[level]) + ' ' +
             Colored(origin, 'lightcyan') + '.' +
             Colored(alias, 'lightpurple') + ': ' +
             JSON.stringify(data)
@@ -39,7 +45,7 @@ export default class Log {
         if (origin === 'Genome' || origin === 'NN_Walker') origin  += Colored(' ' + (domain as any).id, 'lightblue');
         
         console.log(
-            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(LevelString(level), LogColor[level]) + ' ' +
             Colored(origin, 'lightcyan') + '.' +
             Colored(alias, 'lightgreen') + ': ' +
             inout
@@ -51,7 +57,7 @@ export default class Log {
         if (level > this.Level) return;
                 
         console.log(
-            Colored(LogLevel[level], LogColor[level]) + ' ' +
+            Colored(LevelString(level), LogColor[level]) + ' ' +
             Colored(e.name, 'lightcyan') + '.' +
             e.message
         )
@@ -96,7 +102,7 @@ export default class Log {
                 output: 'purple'
             }[out_node.type];
             let color = null as any;
-            if (!conn.enabled) {
+            if (!conn.enabled.value) {
                 color = 'darkgray';
             }
             console.log(

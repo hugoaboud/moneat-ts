@@ -97,9 +97,6 @@ import Log, { LogLevel } from "../util/Log"
         step.push(node.bias.value);
         step.push(this.id_to_i[node.id]);
 
-        if (Log.Level === LogLevel.DEBUG)
-            Log.Data(this,'step',step, LogLevel.DEBUG);
-            
         return step;
     }
 

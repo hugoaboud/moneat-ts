@@ -1,4 +1,5 @@
 import { Activation } from "../src/Activation";
+import { BooleanAttribute } from "../src/Attribute";
 import { ConnectionGene } from "../src/Gene";
 import { Genome } from "../src/Genome";
 import { Innovation } from "../src/Innovation";
@@ -77,13 +78,12 @@ describe ('Historical Gene Matching', () => {
 
     describe('MatchGenes', () => {
 
-        const TGene = (innovation: number) => ({
-            in_node: null as any,
-            out_node: null as any,
-            enabled: true,
-            weight: null as any,
-            innovation
-        } as ConnectionGene );
+        const TGene = (innovation: number) => {
+            let gene = new ConnectionGene(0, 0, null as any, false);
+            gene.innovation = innovation;
+            gene.enabled = new BooleanAttribute(Config().enabled);
+            return gene;
+        };
         const TGenome = (genes: ConnectionGene[]) => {
             let genome = new Genome(Config());
             (genome as any).conns = genes;
@@ -164,7 +164,7 @@ describe('Mutation', () => {
             
             let connections = genome.getConns();
             expect(connections.length).toBe(1);
-            expect(connections[0].enabled).toBe(true);
+            expect(connections[0].enabled.value).toBe(true);
             expect(connections[0].innovation).toBe(Innovation.Last());
         });
     
@@ -189,7 +189,7 @@ describe('Mutation', () => {
             let genome = new Genome(Config());
             genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
             let conn = genome.getConns()[0];
-            conn.enabled = false;
+            conn.enabled.value = false;
             expect(() => {
                 genome.AddNode(conn);
             }).toThrowError('E_GENOME: Can\'t add a node to a disabled connection');
@@ -200,7 +200,7 @@ describe('Mutation', () => {
             genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
             genome.AddNode(genome.getConns()[0]);
             
-            expect(genome.getConns()[0].enabled).toBe(false);
+            expect(genome.getConns()[0].enabled.value).toBe(false);
         });
         
         test('Should create a node', async () => {
@@ -220,11 +220,11 @@ describe('Mutation', () => {
             expect(genome.getConns()[1]).toBeDefined();
             expect(genome.getConns()[1].in_node).toBe(0);
             expect(genome.getConns()[1].out_node).toBe(6);
-            expect(genome.getConns()[1].enabled).toBe(true);
+            expect(genome.getConns()[1].enabled.value).toBe(true);
             expect(genome.getConns()[2]).toBeDefined();
             expect(genome.getConns()[2].in_node).toBe(6);
             expect(genome.getConns()[2].out_node).toBe(3);
-            expect(genome.getConns()[2].enabled).toBe(true);
+            expect(genome.getConns()[2].enabled.value).toBe(true);
         });
     
     })
@@ -344,7 +344,7 @@ describe('Clone', () => {
             let clone_conn = clone.getConns()[i];
             expect(genome_conn.in_node).toEqual(clone_conn.in_node);
             expect(genome_conn.out_node).toEqual(clone_conn.out_node);
-            expect(genome_conn.enabled).toEqual(clone_conn.enabled);
+            expect(genome_conn.enabled.value).toEqual(clone_conn.enabled.value);
             expect(genome_conn.weight.value).toEqual(clone_conn.weight.value);
             expect(genome_conn.innovation).toEqual(clone_conn.innovation);
         }

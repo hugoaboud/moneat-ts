@@ -23,49 +23,38 @@ export default class Tournament extends Evolution {
     protected moneat_config!: IMONEATConfig
     protected config!: ITournamentConfig
 
-    protected last_fitness_sum: number = 0
-    protected stagnation: number = 0
-
     protected epoch = 0;
 
     OffspringBySpecies(species: Species[]): number[] {
-        
-        let n = this.moneat_config.population;
-
-        let sum = 0;
+        if (Log.Level === LogLevel.DEBUG)
+            Log.Method(this, 'OffspringBySpecies', `(species:${species.length})`, LogLevel.DEBUG);
+            
+        let fitness_sum = 0;
         for (let i = 0; i < species.length; i++)
-            sum += species[i].fitness[0];
-
-        let n2 = 0;
-        let offspring = species.map((s,i) => {
-            if (s.population.length <= 1) return 0;
-            let o = Math.floor(n * (s.fitness[0]/sum))
-            n2 += o;
+            fitness_sum += species[i].fitness[0];
+            
+        let n = this.moneat_config.population;
+        let n_out = 0;
+        let e_out = 0;
+        let offspring = species.map((sp,i) => {
+            let elit = Math.min(sp.population.length, this.config.elit)
+            let sp_offspring = Math.floor(n * (sp.fitness[0]/fitness_sum))
+            let o = Math.max(elit,sp_offspring) - elit;
+            n_out += o;
+            e_out += elit;
             return o;
         })
 
         // Ensure fixed size population
-        if (n2 < n) offspring[0] += (n-n2)
+        if (n_out < n-e_out) offspring[0] += (n-e_out-n_out)
+        if (Log.Level === LogLevel.DEBUG)
+            Log.Method(this, 'OffspringBySpecies', ` => offspring:[${offspring.toString()}]`, LogLevel.DEBUG);
         return offspring;
     }
     
     Epoch(moneat: MONEAT): Individual[] {
-        
-        let population = moneat.getPopulation();
         let species = moneat.getSpecies();
         Log.Method(this, 'Epoch', `(epoch:${this.epoch++}, species:${species.length})`, LogLevel.INFO);
-
-        let fitness_sum = population.reduce((a,ind) => 
-            a + ind.fitness.reduce((a,f) => a + f, 0)
-        , 0);
-        if (Math.abs(this.last_fitness_sum - fitness_sum) < this.config.stagnation.threshold)
-            this.stagnation++;
-        else this.stagnation = 0;
-
-        if (this.stagnation > this.config.stagnation.max_epochs) {
-            Log.Data(this, 'Stagnation', {fitness_sum: fitness_sum}, LogLevel.INFO);
-            species = species.slice(0,this.config.stagnation.top_species)
-        }
 
         let o = this.OffspringBySpecies(species);
         let offspring = [] as Individual[];
@@ -76,7 +65,6 @@ export default class Tournament extends Evolution {
     }
 
     SpeciesEpoch(i: number, species: Species, offspring: number): Individual[] {
-
         Log.Method(this, `SpeciesEpoch.${i}`, `(population:${species.population.length},offspring:${offspring})`, LogLevel.INFO);
 
         let population = species.population;
@@ -97,7 +85,8 @@ export default class Tournament extends Evolution {
 
     /** Remove worst performing individuals from population */
     Death(population: Individual[]) {
-        return population.slice(0,Math.ceil(population.length*this.config.death_rate))
+        let end = Math.ceil(population.length*this.config.death_rate);
+        return population.slice(0,Math.max(this.config.elit,end));
     }
 
     /** Reproduce population among itself */
@@ -115,14 +104,12 @@ export default class Tournament extends Evolution {
                 shared_fitness: []
             })
         }
-        return newborns;
+        return population.slice(0,this.config.elit).concat(newborns);
     }
 
     /** Mutate population (except elit) */
     Mutate(population: Individual[]) {
-        population.slice(this.config.elit).map(ind => {
-            ind.genome.Mutate();
-        })
+        population.slice(this.config.elit).map(ind => ind.genome.Mutate())
         return population;
     }
 

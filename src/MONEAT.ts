@@ -52,6 +52,7 @@ export interface Species {
     representative: Individual
     population: Individual[]
     fitness: number[]
+    stagnation: number
     avg_dist: number
 }
 
@@ -108,8 +109,8 @@ export default class MONEAT {
         for (let i = 0; i < match.matching.length; i++) {
             let a = match.matching[i][0];
             let b = match.matching[i][1];
-            if (!a.enabled) W += b.weight.value;
-            if (!b.enabled) W += a.weight.value;
+            if (!a.enabled.value) W += b.weight.value;
+            if (!b.enabled.value) W += a.weight.value;
             else W += Math.abs(a.weight.value-b.weight.value);
         }
 
@@ -127,6 +128,7 @@ export default class MONEAT {
             representative: s.population[Math.floor(Math.random()*s.population.length)],
             population: [],
             fitness: Array(this.config.fitness.length).fill(0),
+            stagnation: s.stagnation,
             avg_dist: 0
         })) as Species[];
 
@@ -149,6 +151,7 @@ export default class MONEAT {
                     representative: ind,
                     population: [ind],
                     fitness: Array(this.config.fitness.length).fill(0),
+                    stagnation: 0,
                     avg_dist: 0
                 })
             }
@@ -186,7 +189,7 @@ export default class MONEAT {
      *  Evolution
      */
 
-    Evolve(epochs: number) {
+    Evolve(epochs: number, goal?: (best: number[], avg: number[]) => boolean) {
         Log.Method(this, 'Evolve', `(epochs:${epochs})`, LogLevel.INFO);
 
         // Run epochs
@@ -203,7 +206,10 @@ export default class MONEAT {
                 }
             }
             this.ShareFitnesses();
-            this.ReportFitness();
+            let {best, avg} = this.ReportFitness();
+
+            if (goal)
+                if (goal(best, avg)) break;
 
             // Don't evolve last population, but return it sorted
             if (e == epochs-1) {
@@ -215,6 +221,8 @@ export default class MONEAT {
             Innovation.ResetCache();
             this.population = evolution.Epoch(this);
             this.Speciate();
+
+            //this.population.map(p => Log.Genome(p.genome));
         }
 
         return this.Output();
@@ -229,24 +237,25 @@ export default class MONEAT {
         let best = Array(this.config.fitness.length).fill(-Infinity);
         let sum = Array(this.config.fitness.length).fill(0);
         this.population.map(ind => {
+            Log.Data(this, `Fitness.Individual.${ind.genome.getID()}`, ind.fitness, LogLevel.DEBUG)
             ind.fitness.map((f,i) => {
                 if (f > best[i]) best[i] = f;
                 sum[i] += f;
             })
         })
         let avg = sum.map(f => f/this.population.length);
-        Log.Data(this, 'Fitness', {
-            best,
-            avg
-        }, LogLevel.INFO)
         this.species.map((species,i) => {
-            Log.Data(this, `Species.${i}`, {
+            Log.Data(this, `Fitness.Species.${i}`, {
                 pop: species.population.length,
                 fitness: species.fitness,
                 avg_dist: species.avg_dist
             }, LogLevel.INFO);
         })
-        
+        Log.Data(this, 'Fitness', {
+            best,
+            avg
+        }, LogLevel.INFO)
+        return {best, avg}
     }
 
     Output() {

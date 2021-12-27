@@ -1,6 +1,5 @@
 import { Gaussian } from "./util/Random";
-
-export interface IAttributeConfig {
+export interface INumericAttributeConfig {
     min: number
     max: number
     init: {
@@ -15,17 +14,12 @@ export interface IAttributeConfig {
         }
     }
 }
-
-/**
- * Mutable Parameter (bias, weight and mult)
- */
-
- export class Attribute {
+export class NumericAttribute {
     
     value: number
 
     constructor(
-        private config: IAttributeConfig
+        private config: INumericAttributeConfig
     ) {
         this.value = Gaussian(config.init.mean, config.init.stdev)();
         if (this.value < config.min) this.value = config.min;
@@ -44,7 +38,40 @@ export interface IAttributeConfig {
     }
 
     Clone() {
-        let clone = new Attribute(this.config);
+        let clone = new NumericAttribute(this.config);
+        clone.value = this.value;
+        return clone;
+    }
+
+}
+
+
+export interface IBooleanAttributeConfig {
+    init: boolean,
+    mutation: {
+        prob: number
+    }
+}
+
+export class BooleanAttribute {
+    
+    value: boolean
+
+    constructor(
+        private config: IBooleanAttributeConfig
+    ) {
+        this.value = config.init;
+    }
+
+    Mutate() {
+        let r = Math.random();
+        if (r < this.config.mutation.prob) {
+            this.value = !this.value;
+        }
+    }
+
+    Clone() {
+        let clone = new BooleanAttribute(this.config);
         clone.value = this.value;
         return clone;
     }
