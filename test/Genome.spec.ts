@@ -74,54 +74,54 @@ describe('Constructor', () => {
 
 })
 
-describe ('Historical Gene Matching', () => {
+// describe ('Historical Gene Matching', () => {
 
-    describe('MatchGenes', () => {
+//     describe('MatchGenes', () => {
 
-        const TGene = (innovation: number) => {
-            let gene = new ConnectionGene(null as any, innovation, 0, 0);
-            gene.enabled = new BooleanAttribute(Config().enabled);
-            return gene;
-        };
-        const TGenome = (genes: ConnectionGene[]) => {
-            let genome = new Genome(Config());
-            (genome as any).conns = genes;
-            return genome;
-        }
-        const TMatch = () => {
-            let a = TGenome([TGene(0),TGene(1),TGene(5),TGene(3)]);
-            let b = TGenome([TGene(3),TGene(2),TGene(4),TGene(1)]);
-            return a.MatchGenes(b);
-        }
+//         const TGene = (innovation: number) => {
+//             let gene = new ConnectionGene(null as any, innovation, 0, 0);
+//             gene.enabled = new BooleanAttribute(Config().enabled);
+//             return gene;
+//         };
+//         const TGenome = (genes: ConnectionGene[]) => {
+//             let genome = new Genome(Config());
+//             (genome as any).conns = genes;
+//             return genome;
+//         }
+//         const TMatch = () => {
+//             let a = TGenome([TGene(0),TGene(1),TGene(5),TGene(3)]);
+//             let b = TGenome([TGene(3),TGene(2),TGene(4),TGene(1)]);
+//             return a.MatchGenes(b);
+//         }
 
-        test('Should get innovation ranges for both lists', async () => {
-            let a = [TGene(0),TGene(1),TGene(5),TGene(3)];
-            let b = [TGene(3),TGene(2),TGene(4),TGene(1)];
-            let ranges = ConnInnovation.Ranges(a,b);
-            expect(ranges.a).toEqual([0,5])
-            expect(ranges.b).toEqual([1,4])
-        });
+//         test('Should get innovation ranges for both lists', async () => {
+//             let a = [TGene(0),TGene(1),TGene(5),TGene(3)];
+//             let b = [TGene(3),TGene(2),TGene(4),TGene(1)];
+//             let ranges = ConnInnovation.Ranges(a,b);
+//             expect(ranges.a).toEqual([0,5])
+//             expect(ranges.b).toEqual([1,4])
+//         });
     
-        test('Should return matching genes of both genomes', async () => {
-            let match = TMatch();
-            let matching = match.matching.map(m => m.map(ab => ab.id));
-            expect(matching).toEqual([[1,1],[3,3]])
-        });
+//         test('Should return matching genes of both genomes', async () => {
+//             let match = TMatch();
+//             let matching = match.matching.map(m => m.map(ab => ab.id));
+//             expect(matching).toEqual([[1,1],[3,3]])
+//         });
     
-        test('Should return disjoint genes of both genomes', async () => {
-            let match = TMatch();
-            let disjoint = match.disjoint.map(m => m.id);
-            expect(disjoint).toEqual([0,5])
-        });
+//         test('Should return disjoint genes of both genomes', async () => {
+//             let match = TMatch();
+//             let disjoint = match.disjoint.map(m => m.id);
+//             expect(disjoint).toEqual([0,5])
+//         });
     
-        test('Should return excess genes of both genomes', async () => {
-            let match = TMatch();
-            let excess = match.excess.map(m => m.id);
-            expect(excess).toEqual([2,4])
-        });
+//         test('Should return excess genes of both genomes', async () => {
+//             let match = TMatch();
+//             let excess = match.excess.map(m => m.id);
+//             expect(excess).toEqual([2,4])
+//         });
     
-    });
-})
+//     });
+// })
 
 describe('Mutation', () => {
 

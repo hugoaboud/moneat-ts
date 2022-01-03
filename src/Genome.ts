@@ -1,7 +1,7 @@
 import { ActivationFunction, RandomActivation } from "./Activation";
 import { NumericAttribute, INumericAttributeConfig, IBooleanAttributeConfig } from "./Attribute";
 import { ConnectionGene, NodeGene } from "./Gene";
-import { ConnInnovation, NodeInnovation } from "./Innovation";
+import { ConnInnovation, InnovationRanges, NodeInnovation } from "./Innovation";
 import { Aggregation } from "./MONEAT";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
@@ -93,52 +93,70 @@ export class Genome {
         }
     }
 
-    /* Historical Gene Matching */
+    /* Gene Distance */
 
-    MatchGenes(peer: Genome): Match {
-        let matching = [] as ConnectionGene[][];
-        let disjoint = [] as ConnectionGene[];
-        let excess = [] as ConnectionGene[];
-        let conns = {
-            a: this.conns,
-            b: peer.getConns()
+    Distance(peer: Genome) {
+
+        // Nodes
+        let nodes = {
+            a: Object.values(this.getNodes()),
+            b: Object.values(peer.getNodes())
         }
+        let node_ranges = InnovationRanges(nodes.a, nodes.b);
+        let node_matches = [];
+        let node_distance = { matching: 0, disjoint: 0, excess: 0, larger: Math.max(nodes.a.length,nodes.b.length) };
         
-        let ranges = ConnInnovation.Ranges(conns.a, conns.b);
-        let b_matches = [];
-
-        for (let i = 0; i < conns.a.length; i++) {
-            let ca = conns.a[i];
+        for (let i = 0; i < nodes.a.length; i++) {
+            let na = nodes.a[i];
             
-            // Matching
-            let cb_i = conns.b.findIndex(c => c.id == ca.id);
-            if (cb_i >= 0) {
-                let cb = conns.b[cb_i];
-                b_matches.push(cb_i);
-                //if (!ca.enabled.value && !cb.enabled.value) continue;
-                let m = [ca,cb];
-                matching.push(m);
+            let nb_i = nodes.b.findIndex(c => c.id == na.id);
+            if (nb_i >= 0) {
+                node_matches.push(nb_i);
+                node_distance.matching += na.Distance(nodes.b[nb_i]);
                 continue;
             }
 
-            // Disjoint / Excess
-            //if (!ca.enabled.value) continue;
-            if (ca.id < ranges.b[0] || ca.id > ranges.b[1]) disjoint.push(ca);
-            else excess.push(ca);
+            if (na.id < node_ranges.b[0] || na.id > node_ranges.b[1]) node_distance.disjoint += 1;
+            else node_distance.excess += 1;
+        }
+        for (let i = 0; i < nodes.b.length; i++) {
+            if (node_matches.includes(i)) continue;
+            let cb = nodes.b[i];
+            if (cb.id < node_ranges.a[0] || cb.id > node_ranges.a[1]) node_distance.disjoint += 1;
+            else node_distance.excess += 1;
         }
 
+        // Connections
+        let conns = {
+            a: this.getConns(),
+            b: peer.getConns()
+        }
+        let conn_ranges = InnovationRanges(conns.a, conns.b);
+        let conn_matches = [];
+        let conn_distance = { matching: 0, disjoint: 0, excess: 0, larger: Math.max(nodes.a.length,nodes.b.length) };
+        
+        for (let i = 0; i < conns.a.length; i++) {
+            let na = conns.a[i];
+            
+            let nb_i = conns.b.findIndex(c => c.id == na.id);
+            if (nb_i >= 0) {
+                conn_matches.push(nb_i);
+                conn_distance.matching += na.Distance(conns.b[nb_i]);
+                continue;
+            }
+
+            if (na.id < conn_ranges.b[0] || na.id > conn_ranges.b[1]) conn_distance.disjoint += 1;
+            else conn_distance.excess += 1;
+        }
         for (let i = 0; i < conns.b.length; i++) {
             let cb = conns.b[i];
-            //if (!cb.enabled.value) continue;
-            if (cb.id < ranges.a[0] || cb.id > ranges.a[1]) disjoint.push(cb);
-            else if (!b_matches.includes(i)) excess.push(cb);
+            if (cb.id < conn_ranges.a[0] || cb.id > conn_ranges.a[1]) conn_distance.disjoint += 1;
+            else if (!conn_matches.includes(i)) conn_distance.excess += 1;
         }
 
         return {
-            matching,
-            disjoint,
-            excess,
-            larger: Math.max(conns.a.length, conns.b.length)
+            nodes: node_distance,
+            conns: conn_distance
         }
     }
 
@@ -329,19 +347,6 @@ export class Genome {
         })
         
         return clone;
-    }
-
-    Distance(peer: Genome) {
-        let d = 0;
-        Object.keys(this.nodes).map(id => {
-            if (!peer.nodes[id as any]) return;
-            d += this.nodes[id as any].Distance(peer.nodes[id as any])
-        })
-        Object.keys(this.conns).map(id => {
-            if (!peer.conns[id as any]) return; 
-            d += this.conns[id as any].Distance(peer.conns[id as any])
-        })
-        return d;
     }
 
     /* Getters */

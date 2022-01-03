@@ -1,7 +1,7 @@
 import Evolution, { IEvolutionConfig } from "./Evolution";
 import {FitnessMethod} from "./Fitness";
 import { Genome, IGenomeConfig } from "./Genome"
-import { NodeInnovation, ConnInnovation } from "./Innovation";
+import { NodeInnovation, ConnInnovation, InnovationRanges } from "./Innovation";
 import { NeuralNetwork } from "./NeuralNetwork";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
@@ -106,33 +106,23 @@ export default class MONEAT {
      */
 
     CompatibilityDistance(a: Genome, b: Genome) {
-        let match = a.MatchGenes(b);
-        
-        let a_small = a.getConns().length < 20;
-        let b_small = b.getConns().length < 20;
-
-        let N = (a_small && b_small)?1:match.larger;
-        if (N == 0) N = 1;
-        
-        let M = match.matching.length;
-        let E = match.excess.length;
-        let D = match.disjoint.length;
-        
-        let W = a.Distance(b);
-        if (M > 0) W /= M;
 
         let c1 = this.config.species.compatibility.excess_coeff;
         let c2 = this.config.species.compatibility.disjoint_coeff;
         let c3 = this.config.species.compatibility.weights_coeff;
 
-        return (c1*E)/N + (c2*D)/N + c3*W;
+        let dist = a.Distance(b);
+        let nodes = (c1*dist.nodes.excess + c2*dist.nodes.disjoint + c3*dist.nodes.matching)/dist.nodes.larger;
+        let conns = (c1*dist.conns.excess + c2*dist.conns.disjoint + c3*dist.conns.matching)/dist.conns.larger;
+
+        return nodes + conns;
     }
 
     Speciate() {
 
         // Random representative from each species
         let species = this.species.map((s, i) => ({
-            representative: s.population[Math.floor(Math.random()*s.population.length)],
+            representative: s.population.sort((a,b) => b.fitness[0] - a.fitness[0])[0],
             population: [],
             fitness: Array(this.config.fitness.length).fill(0),
             stagnation: s.stagnation,
@@ -238,10 +228,6 @@ export default class MONEAT {
         return this.Output();
 
     }
-
-    /**
-     * Crossover
-     */
 
     ReportFitness() {
         let best = Array(this.config.fitness.length).fill(-Infinity);

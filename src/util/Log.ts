@@ -5,12 +5,14 @@ import { Exception } from "./Exception";
 export enum LogLevel {
     ERROR,
     INFO,
+    DETAIL,
     DEBUG
 };
 
 const LogColor = {
     [LogLevel.ERROR]: 'red',
     [LogLevel.INFO]: 'yellow',
+    [LogLevel.DETAIL]: 'lightred',
     [LogLevel.DEBUG]: 'lightpurple'
 }
 

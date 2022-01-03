@@ -65,7 +65,7 @@ export default class Tournament extends Evolution {
     }
 
     SpeciesEpoch(i: number, species: Species, offspring: number): Individual[] {
-        Log.Method(this, `SpeciesEpoch.${i}`, `(population:${species.population.length},offspring:${offspring})`, LogLevel.INFO);
+        Log.Method(this, `SpeciesEpoch.${i}`, `(population:${species.population.length},offspring:${offspring})`, LogLevel.DETAIL);
 
         let population = species.population;
 

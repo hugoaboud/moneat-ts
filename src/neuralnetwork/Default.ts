@@ -78,7 +78,6 @@ type NetworkStep = number[]
      * @returns 
      */
     protected Build() {
-        Log.Genome(this.graph.genome);
         let nodes = this.graph.SortedNodes();
 
         nodes.map(node => {
