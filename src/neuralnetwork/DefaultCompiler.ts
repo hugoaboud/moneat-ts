@@ -31,29 +31,29 @@ export function DNeuralNetworkCompiler(genome: Genome): string {
     file += `const n = Array(${Object.values(nodes).length}).fill(0);\n`
 
     // Run
-    let cmds = []
-    graph.Walk();
-    while (true) {
-        let layer = graph.Walk();
-        for (let n = 0; n < layer.length; n++) {
-            let cmd = [];
-            let node = layer[n].gene;
-            let conns = layer[n].inputs;
+    // let cmds = []
+    // graph.Walk();
+    // while (true) {
+    //     let layer = graph.Walk();
+    //     for (let n = 0; n < layer.length; n++) {
+    //         let cmd = [];
+    //         let node = layer[n].gene;
+    //         let conns = layer[n].inputs;
             
-            cmd.push(conns.length);
-            for (let i = 0; i < conns.length; i++) {
-                cmd.push(id_to_i[conns[i].in_node]);
-                cmd.push(conns[i].weight.value);
-            }
-            cmd.push(node.mult.value);
-            cmd.push(node.bias.value);
-            cmd.push(Object.keys(acts).indexOf(node.actv.name));
-            cmd.push(id_to_i[node.id]);
-            cmds.push(cmd);
-        }
-        if (!layer.length) break;
-    }
-    file += `const s = ${JSON.stringify(cmds)}\n`
+    //         cmd.push(conns.length);
+    //         for (let i = 0; i < conns.length; i++) {
+    //             cmd.push(id_to_i[conns[i].in_node]);
+    //             cmd.push(conns[i].weight.value);
+    //         }
+    //         cmd.push(node.mult.value);
+    //         cmd.push(node.bias.value);
+    //         cmd.push(Object.keys(acts).indexOf(node.actv.name));
+    //         cmd.push(id_to_i[node.id]);
+    //         cmds.push(cmd);
+    //     }
+    //     if (!layer.length) break;
+    // }
+    // file += `const s = ${JSON.stringify(cmds)}\n`
     
     file += `function Run(input) {
         for (let i = 0; i < INPUTS; i++) n[i] = input[i];

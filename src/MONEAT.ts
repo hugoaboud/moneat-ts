@@ -1,7 +1,7 @@
 import Evolution, { IEvolutionConfig } from "./Evolution";
 import {FitnessMethod} from "./Fitness";
 import { Genome, IGenomeConfig } from "./Genome"
-import { Innovation } from "./Innovation";
+import { NodeInnovation, ConnInnovation } from "./Innovation";
 import { NeuralNetwork } from "./NeuralNetwork";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
@@ -83,6 +83,15 @@ export default class MONEAT {
             fitness: [],
             shared_fitness: []
         } as Individual))
+        this.population.map(individual => {
+            let nodes = individual.genome.getNodes();
+            for (let i = 0; i < this.config.genome.inputs; i++) {
+                for (let o = 0; o < this.config.genome.outputs; o++) {
+                    individual.genome.AddConnection(nodes[i],nodes[this.config.genome.inputs+o]);
+                }
+            }
+        })
+        this.population.map(pop => Log.Genome(pop.genome));
         this.Speciate();
     }
 
@@ -99,23 +108,18 @@ export default class MONEAT {
     CompatibilityDistance(a: Genome, b: Genome) {
         let match = a.MatchGenes(b);
         
-        let a_small = a.getNodeCount() < 20;
-        let b_small = b.getNodeCount() < 20;
+        let a_small = a.getConns().length < 20;
+        let b_small = b.getConns().length < 20;
 
         let N = (a_small && b_small)?1:match.larger;
-        if (N == 0) return 0;
-
+        if (N == 0) N = 1;
+        
+        let M = match.matching.length;
         let E = match.excess.length;
         let D = match.disjoint.length;
-
-        let W = 0;
-        for (let i = 0; i < match.matching.length; i++) {
-            let a = match.matching[i][0];
-            let b = match.matching[i][1];
-            if (!a.enabled.value) W += b.weight.value;
-            if (!b.enabled.value) W += a.weight.value;
-            else W += Math.abs(a.weight.value-b.weight.value);
-        }
+        
+        let W = a.Distance(b);
+        if (M > 0) W /= M;
 
         let c1 = this.config.species.compatibility.excess_coeff;
         let c2 = this.config.species.compatibility.disjoint_coeff;
@@ -174,14 +178,14 @@ export default class MONEAT {
      */
     ShareFitnesses() {
         for (let i = 0; i < this.species.length; i++) {
-            let s = this.species[i]; 
-            let sn = s.population.length;
+            let specie = this.species[i]; 
+            let sn = specie.population.length;
 
             for (let j = 0; j < sn; j++) {
-                let ind = s.population[j];
+                let ind = specie.population[j];
                 ind.shared_fitness = ind.fitness.map((f,k) => {
                     let fit = f/sn;
-                    s.fitness[k] += fit;
+                    specie.fitness[k] += fit;
                     return fit;
                 });
             }
@@ -222,11 +226,13 @@ export default class MONEAT {
             }
             
             // Evolution epoch
-            Innovation.ResetCache();
+            //NodeInnovation.ResetCache();
+            //ConnInnovation.ResetCache();
             this.population = evolution.Epoch(this);
             this.Speciate();
 
-            //this.population.map(p => Log.Genome(p.genome));
+            if (Log.Level == LogLevel.DEBUG)
+                this.population.map(p => Log.Genome(p.genome));
         }
 
         return this.Output();
@@ -240,7 +246,8 @@ export default class MONEAT {
     ReportFitness() {
         let best = Array(this.config.fitness.length).fill(-Infinity);
         let sum = Array(this.config.fitness.length).fill(0);
-        this.population.map(ind => {
+        let population = this.population.sort((a,b) => b.fitness[0]-a.fitness[0]);
+        population.map(ind => {
             Log.Data(this, `Fitness.Individual.${ind.genome.getID()}`, ind.fitness, LogLevel.DEBUG)
             ind.fitness.map((f,i) => {
                 if (f > best[i]) best[i] = f;
@@ -263,7 +270,7 @@ export default class MONEAT {
     }
 
     Output() {
-        return this.population;
+        return this.population;     
     }
 
     /*

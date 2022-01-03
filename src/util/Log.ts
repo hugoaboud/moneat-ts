@@ -71,7 +71,8 @@ export default class Log {
         console.log(Colored('Genome ', 'lightcyan') + Colored((genome as any).id, 'lightblue'));
         
         console.log(Colored('-nodes:', 'lightgray'));
-        Object.values(nodes).map((node,i) => {
+        Object.keys(nodes).map((k,i) => {
+            let node = nodes[k as any];
             let color = {
                 input: 'blue',
                 hidden: 'green',
@@ -106,7 +107,7 @@ export default class Log {
                 color = 'darkgray';
             }
             console.log(
-                Colored(`\t${(conn.innovation+'   ').slice(0,4)} `, color || 'lightblue') +
+                Colored(`\t${(conn.id+'   ').slice(0,4)} `, color || 'lightblue') +
                 Colored(`${(conn.in_node+'  ').slice(0,3)} `, color || color_in) +
                 Colored(' -> ', color) +
                 Colored(`${(conn.out_node+'  ').slice(0,3)} `, color || color_out) + 

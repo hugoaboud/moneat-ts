@@ -2,19 +2,19 @@ import { Activation } from "../src/Activation";
 import { BooleanAttribute } from "../src/Attribute";
 import { ConnectionGene } from "../src/Gene";
 import { Genome } from "../src/Genome";
-import { Innovation } from "../src/Innovation";
+import { ConnInnovation } from "../src/Innovation";
 import Log from "../src/util/Log";
 import { Genome as Config } from "./config";
 
 
 describe('Innovation', () => {
     test('Global innovation number should start at 0', async () => {
-        expect(Innovation.Last()).toBe(0);
+        expect(ConnInnovation.Last()).toBe(0);
     });
 
     test('Global innovation number should grow at each call', async () => {
-        expect(Innovation.New()).toBe(1);
-        expect(Innovation.New()).toBe(2);
+        expect(ConnInnovation.New(0,0)).toBe(1);
+        expect(ConnInnovation.New(0,1)).toBe(2);
     });
 
 })
@@ -79,8 +79,7 @@ describe ('Historical Gene Matching', () => {
     describe('MatchGenes', () => {
 
         const TGene = (innovation: number) => {
-            let gene = new ConnectionGene(0, 0, null as any, false);
-            gene.innovation = innovation;
+            let gene = new ConnectionGene(null as any, innovation, 0, 0);
             gene.enabled = new BooleanAttribute(Config().enabled);
             return gene;
         };
@@ -98,26 +97,26 @@ describe ('Historical Gene Matching', () => {
         test('Should get innovation ranges for both lists', async () => {
             let a = [TGene(0),TGene(1),TGene(5),TGene(3)];
             let b = [TGene(3),TGene(2),TGene(4),TGene(1)];
-            let ranges = Innovation.Ranges(a,b);
+            let ranges = ConnInnovation.Ranges(a,b);
             expect(ranges.a).toEqual([0,5])
             expect(ranges.b).toEqual([1,4])
         });
     
         test('Should return matching genes of both genomes', async () => {
             let match = TMatch();
-            let matching = match.matching.map(m => m.map(ab => ab.innovation));
+            let matching = match.matching.map(m => m.map(ab => ab.id));
             expect(matching).toEqual([[1,1],[3,3]])
         });
     
         test('Should return disjoint genes of both genomes', async () => {
             let match = TMatch();
-            let disjoint = match.disjoint.map(m => m.innovation);
+            let disjoint = match.disjoint.map(m => m.id);
             expect(disjoint).toEqual([0,5])
         });
     
         test('Should return excess genes of both genomes', async () => {
             let match = TMatch();
-            let excess = match.excess.map(m => m.innovation);
+            let excess = match.excess.map(m => m.id);
             expect(excess).toEqual([2,4])
         });
     
@@ -165,7 +164,7 @@ describe('Mutation', () => {
             let connections = genome.getConns();
             expect(connections.length).toBe(1);
             expect(connections[0].enabled.value).toBe(true);
-            expect(connections[0].innovation).toBe(Innovation.Last());
+            expect(connections[0].id).toBe(ConnInnovation.Last());
         });
     
     })
@@ -346,7 +345,7 @@ describe('Clone', () => {
             expect(genome_conn.out_node).toEqual(clone_conn.out_node);
             expect(genome_conn.enabled.value).toEqual(clone_conn.enabled.value);
             expect(genome_conn.weight.value).toEqual(clone_conn.weight.value);
-            expect(genome_conn.innovation).toEqual(clone_conn.innovation);
+            expect(genome_conn.id).toEqual(clone_conn.id);
         }
     });
 

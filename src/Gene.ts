@@ -2,25 +2,26 @@ import { threadId } from "worker_threads";
 import { ActivationFunction } from "./Activation";
 import { NumericAttribute, INumericAttributeConfig, BooleanAttribute } from "./Attribute";
 import { Genome, IGenomeConfig } from "./Genome";
-import { Innovation } from "./Innovation";
+import { ConnInnovation, NodeInnovation } from "./Innovation";
 import { StringID } from "./util/Random"
 
 export class NodeGene {
 
-    bias!: NumericAttribute
-    mult!: NumericAttribute 
+    bias: NumericAttribute
+    mult: NumericAttribute
     actv: ActivationFunction
 
     constructor(
+        protected config: IGenomeConfig,
         public id: number,
         public type: 'input' | 'hidden' | 'output',
-        protected config: IGenomeConfig,
-        init = true
+        bias?: NumericAttribute, 
+        mult?: NumericAttribute 
     ) {
-        if (init) {
-            this.bias = new NumericAttribute(config.bias)
-            this.mult = new NumericAttribute(config.mult)
-        }
+        if (bias) this.bias = bias.Clone();
+        else this.bias = new NumericAttribute(config.bias);
+        if (mult) this.mult = mult.Clone();
+        else this.mult = new NumericAttribute(config.mult);
         this.actv = ((config.activation as any)[type] || [])[0]
     }
 
@@ -30,40 +31,52 @@ export class NodeGene {
     }
 
     Clone() {
-        let clone = new NodeGene(this.id, this.type, this.config, false);
-        clone.bias = this.bias.Clone();
-        clone.mult = this.mult.Clone();
-        return clone;
+        return new NodeGene(this.config, this.id, this.type, this.bias, this.mult);
     }
     
     Crossover(peer: NodeGene) {
-        let clone = new NodeGene(this.id, this.type, this.config, false);
-        if (Math.random() < 0.5) clone.bias = this.bias.Clone();
-        else clone.bias = peer.bias.Clone();
-        if (Math.random() < 0.5) clone.mult = this.mult.Clone();
-        else clone.mult = peer.mult.Clone();
-        return clone;
+        let bias = this.bias;
+        if (Math.random() < 0.5) bias = peer.bias;
+        let mult = this.mult;
+        if (Math.random() < 0.5) mult = peer.mult;
+        return new NodeGene(this.config, this.id, this.type, bias, mult);
+    }
+
+    Distance(peer: NodeGene) {
+        let d = Math.abs(this.bias.value - peer.bias.value) + Math.abs(this.mult.value - peer.mult.value)
+        if (this.actv != peer.actv) d += 1.0;
+        return d;
+    }
+
+    static NewIO(config: IGenomeConfig, id: number, type: 'input'|'output') {
+        id = NodeInnovation.New(id, id);
+        return new NodeGene(config, id, type);
+    }
+
+    static NewHidden(config: IGenomeConfig, conn: ConnectionGene) {
+        let id = NodeInnovation.New(conn.in_node, conn.out_node);
+        return new NodeGene(config, id, 'hidden');
     }
     
 }
 
 export class ConnectionGene {
 
-    innovation!: number
-    enabled!: BooleanAttribute
-    weight!: NumericAttribute
+    enabled: BooleanAttribute
+    weight: NumericAttribute
 
     constructor(
+        protected config: IGenomeConfig,
+        public id: number,
         public in_node: number,
         public out_node: number,
-        protected config: IGenomeConfig,
-        init = true
+        enabled?: BooleanAttribute,
+        weight?: NumericAttribute
     ) {
-        if (init) {
-            this.innovation = Innovation.New(this.in_node, this.out_node);
-            this.enabled = new BooleanAttribute(this.config.enabled);
-            this.weight = new NumericAttribute(this.config.weight);
-        }
+        if (enabled) this.enabled = enabled.Clone();
+        else this.enabled = new BooleanAttribute(config.enabled);
+        if (weight) this.weight = weight.Clone();
+        else this.weight = new NumericAttribute(config.weight);
     }
 
     Mutate() {
@@ -72,21 +85,26 @@ export class ConnectionGene {
     }
 
     Clone() {
-        let clone = new ConnectionGene(this.in_node,this.out_node,this.config,false);
-        clone.innovation = this.innovation;
-        clone.enabled = this.enabled.Clone();
-        clone.weight = this.weight.Clone();
-        return clone;
+        return new ConnectionGene(this.config,this.id,this.in_node,this.out_node,this.enabled,this.weight);
     }
 
     Crossover(peer: ConnectionGene) {
-        let clone = new ConnectionGene(this.in_node, this.out_node, this.config, false);
-        clone.innovation = this.innovation;
-        if (Math.random() < 0.5) clone.weight = this.weight.Clone();
-        else clone.weight = peer.weight.Clone();
-        if (Math.random() < 0.5) clone.enabled = this.enabled.Clone();
-        else clone.enabled = peer.enabled.Clone();
-        return clone;
+        let enabled = this.enabled;
+        if (Math.random() < 0.5) enabled = peer.enabled;
+        let weight = this.weight;
+        if (Math.random() < 0.5) weight = peer.weight;
+        return new ConnectionGene(this.config, this.id, this.in_node, this.out_node, enabled, weight);
+    }
+
+    Distance(peer: ConnectionGene) {
+        let d = Math.abs(this.weight.value - peer.weight.value)
+        if (this.enabled.value != peer.enabled.value) d += 1.0;
+        return d;
+    }
+
+    static New(config: IGenomeConfig, in_node: number, out_node: number) {
+        let id = ConnInnovation.New(in_node, out_node);
+        return new ConnectionGene(config, id, in_node, out_node);
     }
     
 }

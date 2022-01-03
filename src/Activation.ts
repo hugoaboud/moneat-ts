@@ -16,9 +16,9 @@ export const Activation = {
         if (v > 1) return 1;
         return v;
     },
-    
+
     Sigmoid(v: number) {
-        return 1/(1+Math.pow(Math.E, -v));
+        return 1/(1+Math.exp(-5*v));
     }
 
 }
