@@ -1,9 +1,7 @@
-import { threadId } from "worker_threads";
 import { ActivationFunction } from "./Activation";
-import { NumericAttribute, INumericAttributeConfig, BooleanAttribute } from "./Attribute";
-import { Genome, IGenomeConfig } from "./Genome";
+import { NumericAttribute, BooleanAttribute } from "./Attribute";
+import { IGenomeConfig } from "./Genome";
 import { ConnInnovation, NodeInnovation } from "./Innovation";
-import { StringID } from "./util/Random"
 
 export class NodeGene {
 

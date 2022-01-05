@@ -29,7 +29,7 @@ describe('Reset', () => {
         }));
         moneat.getPopulation().map(ind => {
             expect(ind.network).toBeNull();
-            moneat.ResetNetworkAndFitness(ind);
+            moneat.ResetIndividual(ind);
             expect(ind.network).not.toBeNull();
             expect(ind.fitness).toHaveLength(0);
         })
@@ -45,7 +45,8 @@ describe('Compatibility Distance', () => {
         }))
         let a = moneat.getPopulation()[0].genome;
         let b = moneat.getPopulation()[1].genome;
-        let dist = moneat.CompatibilityDistance(a, b);
+        //let dist = moneat.CompatibilityDistance(a, b);
+        let dist = 999;
         expect(dist).toEqual(0);
     });
 
@@ -55,7 +56,8 @@ describe('Compatibility Distance', () => {
         }))
         let genome = moneat.getPopulation()[0].genome;
         let clone = genome.Clone();
-        let dist = moneat.CompatibilityDistance(genome, clone);
+        //let dist = moneat.CompatibilityDistance(genome, clone);
+        let dist = 999;
         expect(dist).toEqual(0);
     });
 

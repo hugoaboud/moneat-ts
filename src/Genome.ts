@@ -43,6 +43,7 @@ export interface IGenomeConfig {
     }
     
     feedforward: boolean
+    initial_connection_prob: number
 
 }
 export function GenomeConfig(config: IGenomeConfig) {return config;}
@@ -90,6 +91,15 @@ export class Genome {
         for (let i = 0; i < config.outputs; i++) {
             let node = NodeGene.NewIO(config, i + config.inputs, 'output');
             this.nodes[node.id] = node;
+        }
+
+        if (config.initial_connection_prob > 0) {
+            for (let i = 0; i < config.inputs; i++) {
+                for (let o = 0; o < config.outputs; o++) {
+                    if (config.initial_connection_prob >= 1 || Math.random() < config.initial_connection_prob)
+                        this.AddConnection(this.nodes[i],this.nodes[config.inputs+o]);
+                }
+            }
         }
     }
 
@@ -255,11 +265,7 @@ export class Genome {
         // Topology
         try {
             if (this.config.mutation.single) {
-                let sum = this.config.mutation.add_connection +
-                          this.config.mutation.remove_connection +
-                          this.config.mutation.add_node +
-                          this.config.mutation.remove_node;
-                let r = Math.random() * sum;
+                let r = Math.random();
                 if (r < this.config.mutation.add_connection) {
                     let pair = this.RandomNodePair();
                     this.AddConnection(pair[0], pair[1]);
@@ -316,18 +322,16 @@ export class Genome {
     Clone(): Genome {
         let clone = new Genome(this.config);
         clone.nodes = Object.values(this.nodes).reduce((a:Record<number,NodeGene>,x) => {
-            a[x.id] = x.Clone()
-            return a;        }, {});
+            a[x.id] = x.Clone();
+            return a;
+        }, {});
         clone.conns = this.conns.map(conn => conn.Clone());
         return clone;
     }
 
     Crossover(peer: Genome): Genome {
         Log.Method(this,'Crossover',`(peer:${peer.getID()})`, LogLevel.DEBUG);
-        // "In composing the offspring/, genes are randomly chosen from either parent at matching genes,
-        // whereas all excess or disjoint genes are always included from the more fit parent."
-        // On our case, we assume "this" is the fittest parent.
-        
+
         let clone = new Genome(this.config);
         
         let peer_conns = peer.conns.map(c => c.id);

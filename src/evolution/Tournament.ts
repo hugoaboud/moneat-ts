@@ -1,5 +1,6 @@
 import Evolution, { IEvolutionConfig } from "../Evolution";
-import MONEAT, { IMONEATConfig, Individual, Species } from "../MONEAT";
+import MONEAT, { IMONEATConfig, Individual } from "../MONEAT";
+import { Species } from "../Species";
 import Log, { LogLevel } from "../util/Log";
 
 export interface ITournamentConfig extends IEvolutionConfig {
@@ -9,11 +10,7 @@ export interface ITournamentConfig extends IEvolutionConfig {
     /** Death Rate: [0~1] Rate of population to kill at each epoch */
     death_rate: number,
 
-    stagnation: {
-        threshold: number
-        max_epochs: number
-        top_species: number
-    }
+    max_stagnation: number
 
 }
 export function TournamentConfig(config: Omit<ITournamentConfig, 'class'>) { return { ...config, class: Tournament } }
@@ -54,6 +51,8 @@ export default class Tournament extends Evolution {
     
     Epoch(moneat: MONEAT): Individual[] {
         let species = moneat.getSpecies();
+        
+        if (species.length > 2) species = species.filter(specie => specie.stagnation < this.config.max_stagnation);
         Log.Method(this, 'Epoch', `(epoch:${this.epoch++}, species:${species.length})`, LogLevel.INFO);
 
         let o = this.OffspringBySpecies(species);
@@ -101,7 +100,8 @@ export default class Tournament extends Evolution {
                 genome: (a.shared_fitness[0] > b.shared_fitness[0])?a.genome.Crossover(b.genome):b.genome.Crossover(a.genome),
                 network: null as any,
                 fitness: [],
-                shared_fitness: []
+                shared_fitness: [],
+                species: null as any
             })
         }
         return population.slice(0,this.config.elit).concat(newborns);

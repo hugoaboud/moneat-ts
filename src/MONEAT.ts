@@ -3,8 +3,10 @@ import {FitnessMethod} from "./Fitness";
 import { Genome, IGenomeConfig } from "./Genome"
 import { NodeInnovation, ConnInnovation, InnovationRanges } from "./Innovation";
 import { NeuralNetwork } from "./NeuralNetwork";
+import { Species } from "./Species";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
+import { StringID } from "./util/Random";
 
 /**
  * NEAT Configuration
@@ -12,8 +14,9 @@ import Log, { LogLevel } from "./util/Log";
 
 export enum Aggregation {
     Sum,
-    Max
+    max
 }
+
 export interface IMONEATConfig {
 
     population: number
@@ -32,6 +35,7 @@ export interface IMONEATConfig {
     network: typeof NeuralNetwork
     fitness: FitnessMethod[]
     evolution: IEvolutionConfig
+    fitness_epsilon: number
 
 }
 
@@ -42,18 +46,11 @@ export function MONEATConfig(config: IMONEATConfig) {return config;}
  */
 
 export interface Individual {
+    species: Species
     genome: Genome
     network: NeuralNetwork
     fitness: number[]
     shared_fitness: number[]
-}
-
-export interface Species {
-    representative: Individual
-    population: Individual[]
-    fitness: number[]
-    stagnation: number
-    avg_dist: number
 }
 
 /**
@@ -81,21 +78,14 @@ export default class MONEAT {
             genome: new Genome(this.config.genome),
             network: null as any,
             fitness: [],
-            shared_fitness: []
-        } as Individual))
-        this.population.map(individual => {
-            let nodes = individual.genome.getNodes();
-            for (let i = 0; i < this.config.genome.inputs; i++) {
-                for (let o = 0; o < this.config.genome.outputs; o++) {
-                    individual.genome.AddConnection(nodes[i],nodes[this.config.genome.inputs+o]);
-                }
-            }
-        })
+            shared_fitness: [],
+            species: null as any
+        } as Individual));
         this.population.map(pop => Log.Genome(pop.genome));
         this.Speciate();
     }
 
-    ResetNetworkAndFitness(ind: Individual) {
+    ResetIndividual(ind: Individual) {
         ind.network = new (this.config.network as any)(ind.genome)
         ind.fitness = []
         ind.shared_fitness = []
@@ -105,62 +95,55 @@ export default class MONEAT {
      *  Speciation 
      */
 
-    CompatibilityDistance(a: Genome, b: Genome) {
-
-        let c1 = this.config.species.compatibility.excess_coeff;
-        let c2 = this.config.species.compatibility.disjoint_coeff;
-        let c3 = this.config.species.compatibility.weights_coeff;
-
-        let dist = a.Distance(b);
-        let nodes = (c1*dist.nodes.excess + c2*dist.nodes.disjoint + c3*dist.nodes.matching)/dist.nodes.larger;
-        let conns = (c1*dist.conns.excess + c2*dist.conns.disjoint + c3*dist.conns.matching)/dist.conns.larger;
-
-        return nodes + conns;
-    }
-
     Speciate() {
 
-        // Random representative from each species
-        let species = this.species.map((s, i) => ({
-            representative: s.population.sort((a,b) => b.fitness[0] - a.fitness[0])[0],
-            population: [],
-            fitness: Array(this.config.fitness.length).fill(0),
-            stagnation: s.stagnation,
-            avg_dist: 0
-        })) as Species[];
+        // New empty species with parent representatives
+        for (let s = 0; s < this.species.length; s++) {
+            this.species[s].population = [];
+        }
 
         // Assign each individual to an species
         for (let i = 0; i < this.population.length; i++) {
             let ind = this.population[i];
             let match = false;
-            for (let j = 0; j < species.length; j++) {
-                let s = species[j];
-                let dist = this.CompatibilityDistance(ind.genome, s.representative.genome);
-                if (dist <= this.config.species.compatibility.threshold) {
-                    species[j].population.push(ind);
-                    species[j].avg_dist += dist;
+            for (let j = 0; j < this.species.length; j++) {
+                if (this.species[j].AddIndividual(ind)) {
                     match = true;
                     break;
                 }
             }
             if (!match) {
-                species.push({
-                    representative: ind,
-                    population: [ind],
-                    fitness: Array(this.config.fitness.length).fill(0),
-                    stagnation: 0,
-                    avg_dist: 0
-                })
+                let specie = new Species(ind, this.config);
+                specie.population = [ind];
+                this.species.push(specie);
             }
         }
 
         // Filter empty species
-        this.species = species.filter(s => s.population.length);
+        this.species = this.species.filter(s => s.population.length);
 
         // Average distance
         this.species.map(species => {
             species.avg_dist /= species.population.length;
         })
+
+    }
+
+    ElectSpeciesRepresentatives() {
+        for (let s = 0; s < this.species.length; s++) {
+            let specie = this.species[s];
+            let best_index = Infinity;
+            let best = null as any;
+            for (let i = 0; i < specie.population.length; i++) {
+                let individual = specie.population[i];
+                let index = this.population.indexOf(individual);
+                if (index < best_index) {
+                    best_index = index;
+                    best = individual;
+                }
+            }
+            specie.representative = best;
+        }
     }
 
     /** 
@@ -169,16 +152,24 @@ export default class MONEAT {
     ShareFitnesses() {
         for (let i = 0; i < this.species.length; i++) {
             let specie = this.species[i]; 
-            let sn = specie.population.length;
 
-            for (let j = 0; j < sn; j++) {
+            let specie_fitness = Array(this.config.fitness.length).fill(0);
+            for (let j = 0; j < specie.population.length; j++) {
                 let ind = specie.population[j];
                 ind.shared_fitness = ind.fitness.map((f,k) => {
-                    let fit = f/sn;
-                    specie.fitness[k] += fit;
+                    let fit = f/specie.population.length;
+                    specie_fitness[k] += fit;
                     return fit;
                 });
             }
+
+            let diff = 0;
+            for (let j = 0; j < specie.fitness.length; j++) {
+                diff += Math.abs(specie.fitness[j] - specie_fitness[j]);
+            }
+            if (diff <= this.config.fitness_epsilon) specie.stagnation++;
+            else specie.stagnation = 0;
+            specie.fitness = specie_fitness;
         }
     }
 
@@ -190,34 +181,33 @@ export default class MONEAT {
         Log.Method(this, 'Evolve', `(epochs:${epochs})`, LogLevel.INFO);
 
         // Run epochs
-        let evolution = new (this.config.evolution.class as any)(this.config)
+        let evolution = new (this.config.evolution.class as any)(this.config) as Evolution
         for (let e = 0; e < epochs; e++) {
             Log.Method(this, `Evolve.${e}`, `()`, LogLevel.INFO);
 
-            // Reset networks and fitnesses
-            this.population.map(ind => this.ResetNetworkAndFitness(ind));
+            // Reset individuals (new networks, zero fitness)
+            this.population.map(ind => this.ResetIndividual(ind));
+            
             // Calculate fitnesses
             for (let f = 0; f < this.config.fitness.length; f++) {
                 let method = this.config.fitness[f];
                 for (let n = 0; n < this.population.length; n++) {
-                    this.population[n].fitness[f] = method(this.population[n].network);
+                    this.population[n].fitness[f] = method(this.population[n].network) || -999;
                 }
             }
             this.ShareFitnesses();
+
+            this.population = evolution.Sort(this.population);
+            this.ElectSpeciesRepresentatives();
+
             let {best, avg} = this.ReportFitness();
 
             if (goal)
                 if (goal(best, avg)) break;
 
-            // Don't evolve last population, but return it sorted
-            if (e == epochs-1) {
-                this.population = evolution.Sort(this.population);
-                break;
-            }
-            
-            // Evolution epoch
-            //NodeInnovation.ResetCache();
-            //ConnInnovation.ResetCache();
+            // Don't evolve on last epoch
+            if (e == epochs-1) break;
+                
             this.population = evolution.Epoch(this);
             this.Speciate();
 
@@ -243,8 +233,10 @@ export default class MONEAT {
         let avg = sum.map(f => f/this.population.length);
         this.species.map((species,i) => {
             Log.Data(this, `Fitness.Species.${i}`, {
+                id: species.id,
                 pop: species.population.length,
                 fitness: species.fitness,
+                stagnation: species.stagnation,
                 avg_dist: species.avg_dist
             }, LogLevel.INFO);
         })

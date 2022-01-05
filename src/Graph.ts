@@ -6,7 +6,6 @@ export interface GraphNode {
     inputs: ConnectionGene[]
     outputs: NodeGene[]
 }
-
 interface SortNode extends GraphNode {
     _inputs: number[]
     _outputs: number[]
@@ -113,19 +112,20 @@ export class Graph {
 
     private Sort(subgraph: SortSubgraph): GraphNode[] {
         let sorted = [] as GraphNode[];
+
         let nodes = Object.values(subgraph);
         if (nodes.length == 1) return nodes;
         
-        let input_nodes = Object.values(subgraph).filter(node => (node as any)._inputs.length == 0);
+        let input_nodes = nodes.filter(node => (node as any)._inputs.length == 0);
         input_nodes.map(n => {
             this.Sort_RemoveNode(subgraph, n);
             sorted.push(n);
         });
 
-        let output_nodes = Object.values(subgraph).filter(node => (node as any)._outputs.length == 0);
+        let output_nodes = nodes.filter(node => (node as any)._outputs.length == 0);
 
         if (output_nodes.length == 0) {
-            return sorted.concat(Object.values(subgraph));
+            return sorted.concat(nodes);
         }
 
         let layers = this.Sort_Split(subgraph, output_nodes);

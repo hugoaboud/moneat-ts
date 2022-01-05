@@ -65,10 +65,10 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
         },
         mutation: {
             single: true,
-            add_node: 0.2,
-            remove_node: 0.2,
-            add_connection: 0.5,
-            remove_connection: 0.5
+            add_node: 0.1,
+            remove_node: 0.1,
+            add_connection: 0.25,
+            remove_connection: 0.25
         },
         aggregation: {
             default: Aggregation.Sum,
@@ -77,7 +77,8 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
                 options: [Aggregation.Sum]
             }
         },
-        feedforward: true
+        feedforward: true,
+        initial_connection_prob: 1
     }, config);
 }
 
@@ -85,11 +86,7 @@ export function DefaultTournamentConfig(config?: DeepPartial<ITournamentConfig>)
     return Merge(TournamentConfig({
         elit: 2,
         death_rate: 0.8,
-        stagnation: {
-            threshold: 0.001,
-            max_epochs: 20,
-            top_species: 2
-        }
+        max_stagnation: 20
     }),config);
 }
 
@@ -103,11 +100,12 @@ export function DefaultMONEATConfig(config?: DeepPartial<IMONEATConfig>): IMONEA
                 excess_coeff: 1.0,
                 disjoint_coeff: 1.0,
                 weights_coeff: 0.5,
-                threshold: 4.0
+                threshold: 3.5
             }
         },
         network: DNeuralNetwork,
         fitness: [],
-        evolution: DefaultTournamentConfig()
+        evolution: DefaultTournamentConfig(),
+        fitness_epsilon: 0.01
     }, config);
 }
