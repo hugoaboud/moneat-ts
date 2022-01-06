@@ -5,6 +5,8 @@ import { TournamentConfig, ITournamentConfig } from "../evolution/Tournament";
 import { IGenomeConfig } from "../Genome";
 import { Aggregation, IMONEATConfig, MONEATConfig } from "../MONEAT";
 import { DNeuralNetwork } from "../neuralnetwork/Default";
+import { ISpeciationConfig } from "../Speciation";
+import { INEATSpeciationConfig, NEATSpeciationConfig } from "../speciation/NEATSpeciation";
 import { DeepPartial, Merge } from "./Config";
 
 export function DefaultNumericAttributeConfig(config?: DeepPartial<INumericAttributeConfig>): INumericAttributeConfig {
@@ -82,6 +84,18 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
     }, config);
 }
 
+export function DefaultNEATSpeciationConfig(config?: DeepPartial<INEATSpeciationConfig>): INEATSpeciationConfig {
+    return Merge(NEATSpeciationConfig({
+        compatibility: {
+            excess_coeff: 1.0,
+            disjoint_coeff: 1.0,
+            weights_coeff: 0.5,
+        },
+        distance_threshold: 3.0,
+        stagnation_threshold: 0.01
+    }),config);
+}
+
 export function DefaultTournamentConfig(config?: DeepPartial<ITournamentConfig>): ITournamentConfig {
     return Merge(TournamentConfig({
         elit: 2,
@@ -94,18 +108,14 @@ export function DefaultMONEATConfig(config?: DeepPartial<IMONEATConfig>): IMONEA
     return Merge({
         population: 100,
         genome: DefaultGenomeConfig(),
-        species: {
-            fitness_aggr: Aggregation.Sum,
-            compatibility: {
-                excess_coeff: 1.0,
-                disjoint_coeff: 1.0,
-                weights_coeff: 0.5,
-                threshold: 3.5
-            }
-        },
+        speciation: DefaultNEATSpeciationConfig(),
         network: DNeuralNetwork,
         fitness: [],
         evolution: DefaultTournamentConfig(),
         fitness_epsilon: 0.01
     }, config);
+}
+
+function DefaultSpeciationConfig(arg0: { compatibility: { excess_coeff: number; disjoint_coeff: number; weights_coeff: number; }; distance_threshold: number; }): any {
+    throw new Error("Function not implemented.");
 }
