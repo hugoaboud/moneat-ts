@@ -1,9 +1,9 @@
 import { Activation } from "../src/Activation";
 import { IGenomeConfig } from "../src/Genome";
-import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultNumericAttributeConfig } from "../src/Defaults";
+import { DefaultBooleanAttributeConfig, DefaultGenomeConfig, DefaultMONEATConfig, DefaultNumericAttributeConfig } from "../src/Defaults";
 import { DeepPartial, Merge } from "../src/util/Config";
 import { IMONEATConfig } from "../src/MONEAT";
-import { INumericAttributeConfig } from "../src/Attribute";
+import { IBooleanAttributeConfig, INumericAttributeConfig } from "../src/Attribute";
 
 export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGenomeConfig({
     
@@ -23,7 +23,8 @@ export const Genome = (config?: DeepPartial<IGenomeConfig>) => Merge(DefaultGeno
     
 }), config);
 
-export const Attribute = (config?: DeepPartial<INumericAttributeConfig>) => Merge(DefaultNumericAttributeConfig(), config);
+export const NumericAttribute = (config?: DeepPartial<INumericAttributeConfig>) => Merge(DefaultNumericAttributeConfig(), config);
+export const BooleanAttribute = (config?: DeepPartial<IBooleanAttributeConfig>) => Merge(DefaultBooleanAttributeConfig(), config);
 
 export const MONEAT = (config?: DeepPartial<IMONEATConfig>) => Merge(DefaultMONEATConfig({
 

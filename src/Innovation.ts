@@ -6,14 +6,14 @@ import { ConnectionGene, NodeGene } from "./Gene";
  * which allows for efficient crossover of genomes.
  */
 export class NodeInnovation {
-    private static last = 0;
+    private static last = -1;
     private static cache:Record<string,number> = {}
 
     static Last() { return this.last; }
     
     static New(in_id: number, out_id: number) {
         let hash = in_id+'#'+out_id;
-        if (!(hash in this.cache)) this.cache[hash] = this.last++;
+        if (!(hash in this.cache)) this.cache[hash] = ++this.last;
         return this.cache[hash];
     }
     
@@ -22,14 +22,14 @@ export class NodeInnovation {
     }
 }
 export class ConnInnovation {
-    private static last = 0;
+    private static last = -1;
     private static cache:Record<string,number> = {}
 
     static Last() { return this.last; }
     
     static New(in_id: number, out_id: number) {
         let hash = in_id+'#'+out_id;
-        if (!(hash in this.cache)) this.cache[hash] = this.last++;
+        if (!(hash in this.cache)) this.cache[hash] = ++this.last;
         return this.cache[hash];
     }
     

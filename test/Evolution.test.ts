@@ -1,5 +1,5 @@
 import { Genome } from "../src/Genome";
-import { Genome as GenomeConfig } from "./config";
+import { Genome as GenomeConfig } from "./test.config";
 
 describe('Tournament', () => {
 

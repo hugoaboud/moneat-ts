@@ -102,7 +102,7 @@ export class Genome {
         }
     }
 
-    /* Gene Distance */
+    /* Genome Distance */
 
     Distance(peer: Genome) {
 

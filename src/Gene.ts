@@ -32,18 +32,18 @@ export class NodeGene {
         return new NodeGene(this.config, this.id, this.type, this.bias, this.mult);
     }
     
+    Distance(peer: NodeGene) {
+        let d = Math.abs(this.bias.value - peer.bias.value) + Math.abs(this.mult.value - peer.mult.value)
+        if (this.actv != peer.actv) d += 1.0;
+        return d;
+    }
+    
     Crossover(peer: NodeGene) {
         let bias = this.bias;
         if (Math.random() < 0.5) bias = peer.bias;
         let mult = this.mult;
         if (Math.random() < 0.5) mult = peer.mult;
         return new NodeGene(this.config, this.id, this.type, bias, mult);
-    }
-
-    Distance(peer: NodeGene) {
-        let d = Math.abs(this.bias.value - peer.bias.value) + Math.abs(this.mult.value - peer.mult.value)
-        if (this.actv != peer.actv) d += 1.0;
-        return d;
     }
 
     static NewIO(config: IGenomeConfig, id: number, type: 'input'|'output') {

@@ -1,6 +1,6 @@
 {
   "name": "moneat-ts",
-  "version": "0.1.0",
+  "version": "0.1.8",
   "description": "Multi-Objective NeuroEvolution of Augmented Topologies",
   "main": "index.js",
   "directories": {
@@ -11,7 +11,7 @@
     "debug": "yarn build && node inspect",
     "cli": "yarn build && node build/src/cli/CLI.js",
 
-    "test": "yarn build && node --trace-warnings node_modules/.bin/jest --runInBand --no-cache --verbose --silent",
+    "test": "yarn build && node --trace-warnings node_modules/.bin/jest --watch --runInBand --verbose --silent=false",
 
     "example:xor": "yarn build && node build/examples/xor/xor",
 
