@@ -7,13 +7,12 @@
  */
 
 import { Header } from "../../src/cli/String";
-import { ConnInnovation, NodeInnovation } from "../../src/Innovation";
 import MONEAT from "../../src/MONEAT";
 import { NeuralNetwork } from "../../src/NeuralNetwork";
-import { DefaultMONEATConfig } from "../../src/util/Defaults";
+import { DefaultClusterSpeciationConfig, DefaultMONEATConfig } from "../../src/Defaults";
 import Log, { LogLevel } from "../../src/util/Log";
 
-Log.Level = LogLevel.INFO
+Log.Level = LogLevel.DEBUG
 console.log(Header('Example: XOR'))
 
 /*
@@ -59,10 +58,11 @@ function Goal(best: number[], avg: number[]): boolean {
 
 const Config = DefaultMONEATConfig({
     population: 150,
+    speciation: DefaultClusterSpeciationConfig(),
     fitness: [Fitness]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(300, Goal);
+let population = MoNeat.Evolve(1, Goal);
 
 
 let winner = population[0];

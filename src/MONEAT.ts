@@ -12,12 +12,6 @@ import { StringID } from "./util/Random";
 /**
  * NEAT Configuration
  */
-
-export enum Aggregation {
-    Sum,
-    max
-}
-
 export interface IMONEATConfig {
 
     population: number
@@ -32,8 +26,8 @@ export interface IMONEATConfig {
     evolution: IEvolutionConfig
     
 }
-
 export function MONEATConfig(config: IMONEATConfig) {return config;}
+
 
 /**
  * An individual of the population
@@ -75,7 +69,6 @@ export default class MONEAT {
             shared_fitness: [],
             species: null as any
         } as Individual));
-        this.population.map(pop => Log.Genome(pop.genome));
         
         this.speciation = new (this.config.speciation.class as any)(this.config.speciation) as Speciation
         this.speciation.Speciate(this.population);
@@ -106,7 +99,7 @@ export default class MONEAT {
             for (let f = 0; f < this.config.fitness.length; f++) {
                 let method = this.config.fitness[f];
                 for (let n = 0; n < this.population.length; n++) {
-                    this.population[n].fitness[f] = method(this.population[n].network) || -999;
+                    this.population[n].fitness[f] = method(this.population[n].network);
                 }
             }
             this.speciation.ShareFitnesses();

@@ -1,7 +1,7 @@
 import { Activation } from "../src/Activation";
 import { NumericAttribute } from "../src/Attribute";
 import { Genome } from "../src/Genome";
-import { DefaultNumericAttributeConfig } from "../src/util/Defaults";
+import { DefaultNumericAttributeConfig } from "../src/Defaults";
 import { Gaussian } from "../src/util/Random";
 import { Attribute as Config } from "./config";
 

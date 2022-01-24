@@ -1,8 +1,7 @@
-import { ActivationFunction, RandomActivation } from "./Activation";
-import { NumericAttribute, INumericAttributeConfig, IBooleanAttributeConfig } from "./Attribute";
+import { ActivationFunction, Aggregation } from "./Activation";
+import { INumericAttributeConfig, IBooleanAttributeConfig } from "./Attribute";
 import { ConnectionGene, NodeGene } from "./Gene";
-import { ConnInnovation, InnovationRanges, NodeInnovation } from "./Innovation";
-import { Aggregation } from "./MONEAT";
+import { InnovationRanges } from "./Innovation";
 import { Exception } from "./util/Exception";
 import Log, { LogLevel } from "./util/Log";
 import { StringID } from "./util/Random";

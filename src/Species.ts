@@ -13,11 +13,10 @@ export class Species {
 
     constructor(
         public representative: Individual,
-        private config: ISpeciationConfig,
-        fitness_length: number
+        private config: ISpeciationConfig
     ) {
         this.id = StringID();
-        this.fitness = Array(fitness_length).fill(0)
+        this.fitness = Array(representative.fitness.length).fill(0)
     }   
 
 }

@@ -1,13 +1,14 @@
-import { Activation } from "../Activation";
-import { IBooleanAttributeConfig, INumericAttributeConfig } from "../Attribute";
-import { IEvolutionConfig } from "../Evolution";
-import { TournamentConfig, ITournamentConfig } from "../evolution/Tournament";
-import { IGenomeConfig } from "../Genome";
-import { Aggregation, IMONEATConfig, MONEATConfig } from "../MONEAT";
-import { DNeuralNetwork } from "../neuralnetwork/Default";
-import { ISpeciationConfig } from "../Speciation";
-import { INEATSpeciationConfig, NEATSpeciationConfig } from "../speciation/NEATSpeciation";
-import { DeepPartial, Merge } from "./Config";
+import { Activation, Aggregation } from "./Activation";
+import { IBooleanAttributeConfig, INumericAttributeConfig } from "./Attribute";
+import { IEvolutionConfig } from "./Evolution";
+import { TournamentConfig, ITournamentConfig } from "./evolution/Tournament";
+import { IGenomeConfig } from "./Genome";
+import { IMONEATConfig, MONEATConfig } from "./MONEAT";
+import { DNeuralNetwork } from "./neuralnetwork/Default";
+import { ISpeciationConfig } from "./Speciation";
+import { ClusterSpeciationConfig, IClusterSpeciationConfig } from "./speciation/ClusterSpeciation";
+import { INEATSpeciationConfig, NEATSpeciationConfig } from "./speciation/NEATSpeciation";
+import { DeepPartial, Merge } from "./util/Config";
 
 export function DefaultNumericAttributeConfig(config?: DeepPartial<INumericAttributeConfig>): INumericAttributeConfig {
     return Merge({
@@ -70,7 +71,7 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
             add_node: 0.1,
             remove_node: 0.1,
             add_connection: 0.25,
-            remove_connection: 0.25
+            remove_connection: 0.250
         },
         aggregation: {
             default: Aggregation.Sum,
@@ -80,7 +81,7 @@ export function DefaultGenomeConfig(config?: DeepPartial<IGenomeConfig>): IGenom
             }
         },
         feedforward: true,
-        initial_connection_prob: 1
+        initial_connection_prob: 0
     }, config);
 }
 
@@ -91,7 +92,18 @@ export function DefaultNEATSpeciationConfig(config?: DeepPartial<INEATSpeciation
             disjoint_coeff: 1.0,
             weights_coeff: 0.5,
         },
-        distance_threshold: 3.0,
+        stagnation_threshold: 0.01,
+        distance_threshold: 3.0
+    }),config);
+}
+
+export function DefaultClusterSpeciationConfig(config?: DeepPartial<IClusterSpeciationConfig>): IClusterSpeciationConfig {
+    return Merge(ClusterSpeciationConfig({
+        compatibility: {
+            excess_coeff: 1.0,
+            disjoint_coeff: 1.0,
+            weights_coeff: 0.5,
+        },
         stagnation_threshold: 0.01
     }),config);
 }

@@ -3,7 +3,7 @@ import { ConnectionGene, NodeGene } from "./src/Gene";
 import { Genome } from "./src/Genome";
 import { Graph } from "./src/Graph";
 import { DNeuralNetwork } from "./src/neuralnetwork/Default";
-import { DefaultGenomeConfig } from "./src/util/Defaults";
+import { DefaultGenomeConfig } from "./src/Defaults";
 import Log from "./src/util/Log";
 
 console.log(Header('Propagation Algorithm Sandbox'))

@@ -1,6 +1,6 @@
 import { Activation } from "../src/Activation";
 import { IGenomeConfig } from "../src/Genome";
-import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultNumericAttributeConfig } from "../src/util/Defaults";
+import { DefaultGenomeConfig, DefaultMONEATConfig, DefaultNumericAttributeConfig } from "../src/Defaults";
 import { DeepPartial, Merge } from "../src/util/Config";
 import { IMONEATConfig } from "../src/MONEAT";
 import { INumericAttributeConfig } from "../src/Attribute";

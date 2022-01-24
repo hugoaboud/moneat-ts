@@ -53,7 +53,7 @@ export default class Tournament extends Evolution {
         let species = moneat.getSpecies();
         
         if (species.length > 2) species = species.filter(specie => specie.stagnation < this.config.max_stagnation);
-        Log.Method(this, 'Epoch', `(epoch:${this.epoch++}, species:${species.length})`, LogLevel.INFO);
+        Log.Method(this, 'Epoch', `(epoch:${this.epoch++}, population:${moneat.getPopulation().length}, species:${species.length})`, LogLevel.INFO);
 
         let o = this.OffspringBySpecies(species);
         let offspring = [] as Individual[];

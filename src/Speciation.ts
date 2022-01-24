@@ -36,8 +36,8 @@ export abstract class Speciation {
             let specie_fitness = Array(f).fill(0);
             for (let j = 0; j < specie.population.length; j++) {
                 let ind = specie.population[j];
-                ind.shared_fitness = ind.fitness.map((f,k) => {
-                    let fit = f/specie.population.length;
+                ind.shared_fitness = ind.fitness.map((fit,k) => {
+                    fit /= specie.population.length;
                     specie_fitness[k] += fit;
                     return fit;
                 });

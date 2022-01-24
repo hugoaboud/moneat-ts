@@ -16,7 +16,6 @@ export class NEATSpeciation extends Speciation {
      */
 
     Speciate(population: Individual[]) {
-        let f = population[0].fitness.length;
 
         // New empty species with parent representatives
         for (let s = 0; s < this.species.length; s++) {
@@ -34,7 +33,7 @@ export class NEATSpeciation extends Speciation {
                 }
             }
             if (!match) {
-                let specie = new Species(ind, this.config, f);
+                let specie = new Species(ind, this.config);
                 specie.population = [ind];
                 this.species.push(specie);
             }

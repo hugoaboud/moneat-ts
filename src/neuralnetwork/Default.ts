@@ -1,30 +1,22 @@
 import { ActivationFunction } from "../Activation"
-import { ConnectionGene, NodeGene } from "../Gene"
 import { Genome } from "../Genome"
 import { Graph, GraphNode } from "../Graph"
 import { NeuralNetwork } from "../NeuralNetwork"
-import Log, { LogLevel } from "../util/Log"
 
 /**
  * 
  * Default NeuralNetwork
  * 
  * This is the library default implementation of a neural network.
- * It supports generic neurons, recursive connections and spiking activation.
+ * It supports generic neurons and recurrent connections.
  * 
- * An optimized model is built from the genome, which is then
- * used to process input. It usually takes around 30~80us for each run.
- * 
- * It also allows you to compile the neural network into a single .js file, which
- * can be imported and used anywhere.
+ * An optimized model is built from the genome, which is then used to process input.
  * 
  */
 
 type NetworkStep = number[]
 
-
-
- export class DNeuralNetwork extends NeuralNetwork {
+export class DNeuralNetwork extends NeuralNetwork {
 
     // [0.value, 1.value, 2.value, ...]
     protected nodes: number[] = []
@@ -100,9 +92,6 @@ type NetworkStep = number[]
      */
     protected Calc(input: number[]): number[] {
 
-        //console.log(this.graph.genome.getID());
-        //console.log('input', input);
-        //console.log('nodes before', this.nodes);
         // Input
         for (let i = 0; i < this.inputs; i++)
             this.nodes[i] = input[i];
@@ -110,7 +99,6 @@ type NetworkStep = number[]
         // Steps
         for (let i = 0; i < this.steps.length; i++) {
             let step = this.steps[i];
-            //console.log('step', step);
             let val = 0;
             let j = 1;
             
@@ -118,12 +106,8 @@ type NetworkStep = number[]
                 val += this.nodes[step[j]] * step[j+1];
             }
             this.nodes[step[j+2]] = this.actvs[step[j+2]](val * step[j] + step[j+1]);
-            //console.log('node step', this.nodes);
         }
             
-        //console.log('nodes after', this.nodes);
-        //console.log('output', this.nodes.slice(this.inputs, this.inputs+this.outputs));
-        //console.log('---');
         return this.nodes.slice(-this.outputs);
     }
 

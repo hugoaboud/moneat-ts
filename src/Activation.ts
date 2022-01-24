@@ -1,5 +1,3 @@
-import { Exception } from "./util/Exception";
-
 export type ActivationFunction = (v: number) => number
 export function RandomActivation(options: ActivationFunction[]) {
     return options[Math.floor(Math.random()*options.length)];
@@ -21,4 +19,10 @@ export const Activation = {
         return 1/(1+Math.exp(-5*v));
     }
 
+}
+
+// TODO: move this somewhere else
+export enum Aggregation {
+    Sum,
+    max
 }
