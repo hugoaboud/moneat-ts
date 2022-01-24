@@ -2,7 +2,6 @@ import { Genome } from "./Genome"
 import { IMONEATConfig, Individual } from "./MONEAT"
 import { ISpeciationConfig } from "./Speciation"
 import { StringID } from "./util/Random"
-
 export class Species {
 
     id: string

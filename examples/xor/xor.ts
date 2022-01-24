@@ -12,7 +12,7 @@ import { NeuralNetwork } from "../../src/NeuralNetwork";
 import { DefaultClusterSpeciationConfig, DefaultMONEATConfig } from "../../src/Defaults";
 import Log, { LogLevel } from "../../src/util/Log";
 
-Log.Level = LogLevel.DEBUG
+Log.Level = LogLevel.INFO
 console.log(Header('Example: XOR'))
 
 /*
@@ -62,7 +62,7 @@ const Config = DefaultMONEATConfig({
     fitness: [Fitness]
 });
 const MoNeat = new MONEAT(Config);
-let population = MoNeat.Evolve(1, Goal);
+let population = MoNeat.Evolve(300, Goal);
 
 
 let winner = population[0];

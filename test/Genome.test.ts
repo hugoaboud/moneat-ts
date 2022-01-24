@@ -102,56 +102,57 @@ describe('Constructor', () => {
 
 })
 
-// describe ('Historical Gene Matching', () => {
 
-//     describe('MatchGenes', () => {
+describe ('Genome Distance', () => {
 
-//         const TGene = (innovation: number) => {
-//             let gene = new ConnectionGene(null as any, innovation, 0, 0);
-//             gene.enabled = new BooleanAttribute(Config().enabled);
-//             return gene;
-//         };
-//         const TGenome = (genes: ConnectionGene[]) => {
-//             let genome = new Genome(Config());
-//             (genome as any).conns = genes;
-//             return genome;
-//         }
-//         const TMatch = () => {
-//             let a = TGenome([TGene(0),TGene(1),TGene(5),TGene(3)]);
-//             let b = TGenome([TGene(3),TGene(2),TGene(4),TGene(1)]);
-//             return a.MatchGenes(b);
-//         }
+    describe('Nodes', () => {
 
-//         test('Should get innovation ranges for both lists', async () => {
-//             let a = [TGene(0),TGene(1),TGene(5),TGene(3)];
-//             let b = [TGene(3),TGene(2),TGene(4),TGene(1)];
-//             let ranges = ConnInnovation.Ranges(a,b);
-//             expect(ranges.a).toEqual([0,5])
-//             expect(ranges.b).toEqual([1,4])
-//         });
-    
-//         test('Should return matching genes of both genomes', async () => {
-//             let match = TMatch();
-//             let matching = match.matching.map(m => m.map(ab => ab.id));
-//             expect(matching).toEqual([[1,1],[3,3]])
-//         });
-    
-//         test('Should return disjoint genes of both genomes', async () => {
-//             let match = TMatch();
-//             let disjoint = match.disjoint.map(m => m.id);
-//             expect(disjoint).toEqual([0,5])
-//         });
-    
-//         test('Should return excess genes of both genomes', async () => {
-//             let match = TMatch();
-//             let excess = match.excess.map(m => m.id);
-//             expect(excess).toEqual([2,4])
-//         });
-    
-//     });
-// })
+        test.skip('Should be 0 for clones', () => {          
+        })
 
-describe('Mutation', () => {
+        test.skip('Should calculate matching distance from genes distances', () => {          
+        })
+    
+        test.skip('Should add 1 for each disjoint gene', () => {          
+        })
+    
+        test.skip('Should add 1 for each excess gene', () => {          
+        })
+        
+    })
+
+    describe('Connections', () => {
+
+        test.skip('Should be 0 for clones', () => {          
+        })
+
+        test.skip('Should calculate matching distance from genes distances', () => {
+        })
+    
+        test.skip('Should add 1 for each disjoint gene', () => {
+        })
+    
+        test.skip('Should add 1 for each excess gene', () => {
+        })
+
+    })
+
+    
+})
+
+describe ('Random Genes', () => {
+
+    test.skip('RandomNodePair: Should select a valid random node pair', () => {
+        
+    })
+
+    test.skip('RandomEnabledConnection: Should select a random enabled connection', () => {
+
+    })
+
+})
+
+describe('Mutations', () => {
 
     describe('AddConnection', () => {
 
@@ -305,86 +306,122 @@ describe('Mutation', () => {
         }); 
         
     });
+
 })
 
-// describe('Clone', () => {
+describe('Mutate', () => {
 
-//     test('Should create a new genome with new ID', async () => {
-//         let genome = new Genome(Config());
-//         let clone = genome.Clone();
-//         expect(clone).not.toBe(genome);
-//         expect(clone.getID()).not.toEqual(genome.getID());
-//     });
+    describe('Topology', () => {
 
-//     test('Clone nodes should not reference original nodes', async () => {
-//         let genome = new Genome(Config());
-//         let clone = genome.Clone();
-//         let genome_nodes = genome.getNodes();
-//         let clone_nodes = clone.getNodes();
-//         Object.values(genome_nodes).map(genome_node => {
-//             let clone_node = clone_nodes[genome_node.id];
-//             expect(clone_node).not.toBe(genome_node);    
-//             if (clone_node.bias)
-//                 expect(clone_node.bias).not.toBe(genome_node.bias);    
-//             if (clone_node.mult)
-//                 expect(clone_node.mult).not.toBe(genome_node.mult);    
-//         })
-//     });
+        describe('Single Mutation', () => {
 
-//     test('Clone nodes should be equal to original nodes', async () => {
-//         let genome = new Genome(Config());
-//         let clone = genome.Clone();
-//         let genome_nodes = genome.getNodes();
-//         let clone_nodes = clone.getNodes();
-//         Object.values(genome_nodes).map(genome_node => {
-//             let clone_node = clone_nodes[genome_node.id];
-//             expect(clone_node.id).toEqual(genome_node.id);
-//             expect(clone_node.type).toEqual(genome_node.type);
-//             expect(clone_node.actv).toBe(genome_node.actv);
-//             if (clone_node.bias) expect(clone_node.bias.value).toEqual(genome_node.bias.value);
-//             if (clone_node.mult) expect(clone_node.mult.value).toEqual(genome_node.mult.value);
-//         })
-//     });
+            test.skip('Should call a single mutation method', () => {
+            })
 
-//     test('Clone connections should not reference original connections', async () => {
-//         let genome = new Genome(Config());
-//         genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-//         genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
-//         genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
-//         let clone = genome.Clone();
-//         for (let i = 0; i < genome.getConns().length; i++) {
-//             let genome_conn = genome.getConns()[i];
-//             let clone_conn = clone.getConns()[i];
-//             expect(clone_conn).not.toBe(genome_conn);    
-//             if (clone_conn.weight) expect(clone_conn.weight).not.toBe(genome_conn.out_node);
-//         }
-//     });
+            test.skip('Should call mutations according to probability', () => {
+            })
+            
+        })
 
-//     test('Clone connections should be equal to original connections', async () => {
-//         let genome = new Genome(Config());
-//         genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
-//         genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
-//         genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
-//         let clone = genome.Clone();
-//         for (let i = 0; i < genome.getConns().length; i++) {
-//             let genome_conn = genome.getConns()[i];
-//             let clone_conn = clone.getConns()[i];
-//             expect(genome_conn.in_node).toEqual(clone_conn.in_node);
-//             expect(genome_conn.out_node).toEqual(clone_conn.out_node);
-//             expect(genome_conn.enabled.value).toEqual(clone_conn.enabled.value);
-//             expect(genome_conn.weight.value).toEqual(clone_conn.weight.value);
-//             expect(genome_conn.id).toEqual(clone_conn.id);
-//         }
-//     });
+        describe('Multiple Mutations', () => {
 
-// });
+            test.skip('Should call mutations according to probability', () => {
+            })
+            
+        })
 
-// describe('Crossover', () => {
+    })
 
-//     test.skip('?', async () => {
+    describe('Attributes', () => {
+
+        test.skip('Should mutate all node genes', () => {
+        })
+
+        test.skip('Should mutate all connection genes', () => {
+        })
+
+    })
+
+})
+
+describe('Clone', () => {
+
+    test('Should create a new genome with new ID', async () => {
+        let genome = new Genome(Config());
+        let clone = genome.Clone();
+        expect(clone).not.toBe(genome);
+        expect(clone.getID()).not.toEqual(genome.getID());
+    });
+
+    test('Clone nodes should not reference original nodes', async () => {
+        let genome = new Genome(Config());
+        let clone = genome.Clone();
+        let genome_nodes = genome.getNodes();
+        let clone_nodes = clone.getNodes();
+        Object.values(genome_nodes).map(genome_node => {
+            let clone_node = clone_nodes[genome_node.id];
+            expect(clone_node).not.toBe(genome_node);    
+            if (clone_node.bias)
+                expect(clone_node.bias).not.toBe(genome_node.bias);    
+            if (clone_node.mult)
+                expect(clone_node.mult).not.toBe(genome_node.mult);    
+        })
+    });
+
+    test('Clone nodes should be equal to original nodes', async () => {
+        let genome = new Genome(Config());
+        let clone = genome.Clone();
+        let genome_nodes = genome.getNodes();
+        let clone_nodes = clone.getNodes();
+        Object.values(genome_nodes).map(genome_node => {
+            let clone_node = clone_nodes[genome_node.id];
+            expect(clone_node.id).toEqual(genome_node.id);
+            expect(clone_node.type).toEqual(genome_node.type);
+            expect(clone_node.actv).toBe(genome_node.actv);
+            if (clone_node.bias) expect(clone_node.bias.value).toEqual(genome_node.bias.value);
+            if (clone_node.mult) expect(clone_node.mult.value).toEqual(genome_node.mult.value);
+        })
+    });
+
+    test('Clone connections should not reference original connections', async () => {
+        let genome = new Genome(Config());
+        genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
+        genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
+        let clone = genome.Clone();
+        for (let i = 0; i < genome.getConns().length; i++) {
+            let genome_conn = genome.getConns()[i];
+            let clone_conn = clone.getConns()[i];
+            expect(clone_conn).not.toBe(genome_conn);    
+            if (clone_conn.weight) expect(clone_conn.weight).not.toBe(genome_conn.out_node);
+        }
+    });
+
+    test('Clone connections should be equal to original connections', async () => {
+        let genome = new Genome(Config());
+        genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+        genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
+        genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
+        let clone = genome.Clone();
+        for (let i = 0; i < genome.getConns().length; i++) {
+            let genome_conn = genome.getConns()[i];
+            let clone_conn = clone.getConns()[i];
+            expect(genome_conn.in_node).toEqual(clone_conn.in_node);
+            expect(genome_conn.out_node).toEqual(clone_conn.out_node);
+            expect(genome_conn.enabled.value).toEqual(clone_conn.enabled.value);
+            expect(genome_conn.weight.value).toEqual(clone_conn.weight.value);
+            expect(genome_conn.id).toEqual(clone_conn.id);
+        }
+    });
+
+});
+
+describe('Crossover', () => {
+
+    test.skip('?', async () => {
         
-//     });
+    });
 
-//     // ... neat crossover stuff (innovation, etc)
+    // ... neat crossover stuff (innovation, etc)
 
-// });
+});

@@ -22,20 +22,23 @@ export class Graph {
     ) {
         let nodes = genome.getNodes();
         let conns = genome.getConns();
-        let roots = genome.getOutputs()
+
+        let outs = genome.getOutputs()
                           .map(gene => ({gene, inputs:[], outputs:[]}))
                           .reduce((a:Record<number,GraphNode>,x) => {a[x.gene.id] = x; return a;}, {});        
-        Object.values(roots).map(n => this.nodes[n.gene.id] = n);
         
+        Object.values(outs).forEach(n => this.nodes[n.gene.id] = n);
         this.inputs = genome.getInputs().map(gene => ({gene})) as any as GraphNode[];
 
         while (true) {
             let layer = [];
             for (let c = 0; c < conns.length; c++) {
                 if (!conns[c].enabled.value) continue;
+
                 let in_node = nodes[conns[c].in_node];
-                let out_node = roots[conns[c].out_node];
+                let out_node = outs[conns[c].out_node];
                 if (!out_node) continue;
+                
                 out_node.inputs.push(conns[c]);
                 if (this.nodes[in_node.id]) {
                     this.nodes[in_node.id].outputs.push(out_node.gene);
@@ -49,10 +52,10 @@ export class Graph {
                 this.nodes[in_node.id] = layer[layer.length-1];
             }
             if (layer.length == 0) break;
-            roots = {}
+            outs = {}
             layer.map(n => {
                 this.nodes[n.gene.id] = n;
-                roots[n.gene.id] = n;
+                outs[n.gene.id] = n;
             });
         }
     }

@@ -113,18 +113,21 @@ export class Genome {
         }
         let node_ranges = InnovationRanges(nodes.a, nodes.b);
         let node_matches = [];
-        let node_distance = { matching: 0, disjoint: 0, excess: 0, larger: Math.max(nodes.a.length,nodes.b.length) };
+        let node_distance = {
+            matching: 0,
+            disjoint: 0,
+            excess: 0,
+            larger: Math.max(nodes.a.length,nodes.b.length)
+        };
         
         for (let i = 0; i < nodes.a.length; i++) {
             let na = nodes.a[i];
-            
             let nb_i = nodes.b.findIndex(c => c.id == na.id);
             if (nb_i >= 0) {
                 node_matches.push(nb_i);
                 node_distance.matching += na.Distance(nodes.b[nb_i]);
                 continue;
             }
-
             if (na.id < node_ranges.b[0] || na.id > node_ranges.b[1]) node_distance.disjoint += 1;
             else node_distance.excess += 1;
         }
