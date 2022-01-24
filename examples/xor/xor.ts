@@ -9,7 +9,7 @@
 import { Header } from "../../src/cli/String";
 import MONEAT from "../../src/MONEAT";
 import { NeuralNetwork } from "../../src/NeuralNetwork";
-import { DefaultClusterSpeciationConfig, DefaultMONEATConfig } from "../../src/Defaults";
+import { DefaultClusterSpeciationConfig, DefaultMONEATConfig, DefaultNEATSpeciationConfig } from "../../src/Defaults";
 import Log, { LogLevel } from "../../src/util/Log";
 
 Log.Level = LogLevel.INFO
@@ -58,7 +58,7 @@ function Goal(best: number[], avg: number[]): boolean {
 
 const Config = DefaultMONEATConfig({
     population: 150,
-    speciation: DefaultClusterSpeciationConfig(),
+    speciation: DefaultNEATSpeciationConfig(),
     fitness: [Fitness]
 });
 const MoNeat = new MONEAT(Config);
