@@ -107,32 +107,122 @@ describe ('Genome Distance', () => {
 
     describe('Nodes', () => {
 
-        test.skip('Should be 0 for clones', () => {          
+        test('Should be 0 for clones', () => {
+            let genome = new Genome(Config());
+            let clone = genome.Clone();
+            let dist = genome.Distance(clone);
+            expect(dist.nodes.matching).toEqual(0)
+            expect(dist.nodes.disjoint).toEqual(0)
+            expect(dist.nodes.excess).toEqual(0)
         })
 
-        test.skip('Should calculate matching distance from genes distances', () => {          
+        test('Should be 0 for IO nodes', () => {
+            let genome = new Genome(Config());
+            let peer = genome.Clone();
+            genome.getNodes()[0].bias.value = 0;
+            genome.getNodes()[0].mult.value = 0;
+            peer.getNodes()[0].bias.value = 10;
+            peer.getNodes()[0].mult.value = 10;
+            let dist = genome.Distance(peer);
+            expect(dist.nodes.matching).toEqual(0)
+            expect(dist.nodes.disjoint).toEqual(0)
+            expect(dist.nodes.excess).toEqual(0)
+        })
+
+        test('Should calculate matching distance from genes distances', () => {          
+            let genome = new Genome(Config());
+            let conn = genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            genome.AddNode(conn);
+            let peer = genome.Clone();
+            let genome_nodes = genome.getNodes();
+            let peer_nodes = peer.getNodes();
+            genome_nodes[6].bias.value = 0.1;
+            genome_nodes[6].mult.value = 1;
+            peer_nodes[6].bias.value = 0.3;
+            peer_nodes[6].mult.value = 3;
+            let dist = genome.Distance(peer);
+            expect(dist.nodes.matching).toEqual(2.2)
+            expect(dist.nodes.disjoint).toEqual(0)
+            expect(dist.nodes.excess).toEqual(0)
         })
     
-        test.skip('Should add 1 for each disjoint gene', () => {          
+        test('Should add 1 for each disjoint gene', () => {          
+            let genome = new Genome(Config());
+            let conn = genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            genome.AddNode(conn);
+            let peer = genome.Clone();
+            peer.AddNode(peer.getConns()[2]);
+            let dist = genome.Distance(peer);
+            expect(dist.nodes.matching).toEqual(0)
+            expect(dist.nodes.disjoint).toEqual(1)
+            expect(dist.nodes.excess).toEqual(0)
         })
     
-        test.skip('Should add 1 for each excess gene', () => {          
+        test('Should add 1 for each excess gene', () => {          
+            let genome = new Genome(Config());
+            let conn = genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            genome.AddNode(conn);
+            genome.AddNode(genome.getConns()[2]);
+            genome.AddNode(genome.getConns()[4]);
+            let peer = genome.Clone();
+            peer.RemoveNode(peer.getNodes()[7]);
+            let dist = genome.Distance(peer);
+            expect(dist.nodes.matching).toEqual(0)
+            expect(dist.nodes.disjoint).toEqual(0)
+            expect(dist.nodes.excess).toEqual(1)
         })
         
     })
 
     describe('Connections', () => {
 
-        test.skip('Should be 0 for clones', () => {          
+        test('Should be 0 for clones', () => {
+            let genome = new Genome(Config());
+            let clone = genome.Clone();
+            let dist = genome.Distance(clone);
+            expect(dist.conns.matching).toEqual(0)
+            expect(dist.conns.disjoint).toEqual(0)
+            expect(dist.conns.excess).toEqual(0)
         })
 
-        test.skip('Should calculate matching distance from genes distances', () => {
+        test('Should calculate matching distance from genes distances', () => {
+            let genome = new Genome(Config());
+            genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            let peer = genome.Clone();
+            let genome_conns = genome.getConns();
+            let peer_conns = peer.getConns();
+            genome_conns[0].weight.value = 0.1;
+            genome_conns[0].enabled.value = true;
+            peer_conns[0].weight.value = 1;
+            peer_conns[0].enabled.value = false;
+            let dist = genome.Distance(peer);
+            expect(dist.conns.matching).toEqual(1.9)
+            expect(dist.conns.disjoint).toEqual(0)
+            expect(dist.conns.excess).toEqual(0)
         })
     
-        test.skip('Should add 1 for each disjoint gene', () => {
+        test('Should add 1 for each disjoint gene', () => {
+            let genome = new Genome(Config());
+            genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            let peer = genome.Clone();
+            peer.AddConnection(peer.getNodes()[1],peer.getNodes()[4]);
+            let dist = genome.Distance(peer);
+            expect(dist.conns.matching).toEqual(0)
+            expect(dist.conns.disjoint).toEqual(1)
+            expect(dist.conns.excess).toEqual(0)
         })
     
-        test.skip('Should add 1 for each excess gene', () => {
+        test('Should add 1 for each excess gene', () => {
+            let genome = new Genome(Config());
+            genome.AddConnection(genome.getNodes()[0],genome.getNodes()[3]);
+            genome.AddConnection(genome.getNodes()[1],genome.getNodes()[4]);
+            genome.AddConnection(genome.getNodes()[2],genome.getNodes()[5]);
+            let peer = genome.Clone();
+            peer.RemoveConnection(peer.getConns()[1]);
+            let dist = genome.Distance(peer);
+            expect(dist.conns.matching).toEqual(0)
+            expect(dist.conns.disjoint).toEqual(0)
+            expect(dist.conns.excess).toEqual(1)
         })
 
     })
