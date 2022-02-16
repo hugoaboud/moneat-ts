@@ -121,6 +121,7 @@ export class Genome {
         };
         
         for (let i = 0; i < nodes.a.length; i++) {
+            if (nodes.a[i].type !== 'hidden') continue;
             let na = nodes.a[i];
             let nb_i = nodes.b.findIndex(c => c.id == na.id);
             if (nb_i >= 0) {
@@ -132,6 +133,7 @@ export class Genome {
             else node_distance.excess += 1;
         }
         for (let i = 0; i < nodes.b.length; i++) {
+            if (nodes.b[i].type !== 'hidden') continue;
             if (node_matches.includes(i)) continue;
             let cb = nodes.b[i];
             if (cb.id < node_ranges.a[0] || cb.id > node_ranges.a[1]) node_distance.disjoint += 1;
@@ -228,6 +230,7 @@ export class Genome {
         let conn = ConnectionGene.New(this.config, in_node.id, out_node.id);
         this.conns.push(conn);
         Log.Method(this,'AddConnection',` => conn:${conn.id}`, LogLevel.DEBUG);
+        return conn;
     }
 
     RemoveConnection(conn: ConnectionGene) {
@@ -250,6 +253,7 @@ export class Genome {
         this.conns.push(c0)
         this.conns.push(c1)
         Log.Method(this,'AddNode',` => node:${node.id}, conns:(${c0.id},${c1.id})`, LogLevel.DEBUG);
+        return node;
     }
     
     RemoveNode(node: NodeGene) {
