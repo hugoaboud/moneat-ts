@@ -121,7 +121,7 @@ export class Genome {
         };
         
         for (let i = 0; i < nodes.a.length; i++) {
-            if (nodes.a[i].type !== 'hidden') continue;
+            if (nodes.a[i].type === 'input') continue;
             let na = nodes.a[i];
             let nb_i = nodes.b.findIndex(c => c.id == na.id);
             if (nb_i >= 0) {
@@ -133,7 +133,7 @@ export class Genome {
             else node_distance.excess += 1;
         }
         for (let i = 0; i < nodes.b.length; i++) {
-            if (nodes.b[i].type !== 'hidden') continue;
+            if (nodes.b[i].type === 'input') continue;
             if (node_matches.includes(i)) continue;
             let cb = nodes.b[i];
             if (cb.id < node_ranges.a[0] || cb.id > node_ranges.a[1]) node_distance.disjoint += 1;

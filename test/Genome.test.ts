@@ -116,7 +116,7 @@ describe ('Genome Distance', () => {
             expect(dist.nodes.excess).toEqual(0)
         })
 
-        test('Should be 0 for IO nodes', () => {
+        test('Should be 0 for Input nodes', () => {
             let genome = new Genome(Config());
             let peer = genome.Clone();
             genome.getNodes()[0].bias.value = 0;
@@ -125,6 +125,19 @@ describe ('Genome Distance', () => {
             peer.getNodes()[0].mult.value = 10;
             let dist = genome.Distance(peer);
             expect(dist.nodes.matching).toEqual(0)
+            expect(dist.nodes.disjoint).toEqual(0)
+            expect(dist.nodes.excess).toEqual(0)
+        })
+
+        test('Should not be 0 for Output nodes', () => {
+            let genome = new Genome(Config());
+            let peer = genome.Clone();
+            genome.getNodes()[3].bias.value = 0;
+            genome.getNodes()[3].mult.value = 0;
+            peer.getNodes()[3].bias.value = 10;
+            peer.getNodes()[3].mult.value = 10;
+            let dist = genome.Distance(peer);
+            expect(dist.nodes.matching).not.toEqual(0)
             expect(dist.nodes.disjoint).toEqual(0)
             expect(dist.nodes.excess).toEqual(0)
         })
